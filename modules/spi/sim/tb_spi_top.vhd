@@ -83,14 +83,14 @@ process begin
     wait for PERIOD * 2;
     reset_n <= '1';
     wait for PERIOD;
-    addr <= x"00";
-    din <= x"10";
+    addr <= x"02";
+    din <= x"A1";
     wr_en <= '1';
     wait for PERIOD;
     wr_en <= '0';
     wait for PERIOD;
-    addr <= x"02";
-    din <= x"AA";
+    addr <= x"00";
+    din <= x"10";
     wr_en <= '1';
     wait for PERIOD;
     wr_en <= '0';

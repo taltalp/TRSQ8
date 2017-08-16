@@ -53,7 +53,7 @@ entity spi_top is
 end spi_top;
 
 architecture Behavioral of spi_top is
-    constant ADDR_LSB : integer := 1;
+    constant ADDR_LSB : integer := 0;
     constant OPT_MEM_ADDR_BITS : integer := 1;
     
     signal spi_busy : std_logic;
