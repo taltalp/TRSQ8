@@ -57,6 +57,8 @@ architecture Behavioral of spi_top is
     constant OPT_MEM_ADDR_BITS : integer := 1;
     
     signal spi_busy : std_logic;
+    signal spi_busy_tmp : std_logic;
+    signal spi_enable : std_logic;
     signal spi_rx : std_logic_vector(7 downto 0);
     
     -- Slave Registers
@@ -102,8 +104,16 @@ write_process: process (clk)
                 end case;
             end if;
         elsif (clk = '0') then
+            spi_enable <= SPICON(4);
+            -- Clear enable flag automatically
+            if (spi_busy = '1' and spi_enable = '1') then
+                SPICON <= SPICON(7 downto 5) & '0' & SPICON(3 downto 1) & spi_busy;
+            else
+                SPICON <= SPICON(7 downto 1) & spi_busy;
+            end if;
+
             -- FETCH STATE
-            SPICON <= SPICON(7 downto 1) & spi_busy;
+--            SPICON <= SPICON(7 downto 1) & spi_busy;
             SPIRX <= spi_rx;
         end if;
     end if;

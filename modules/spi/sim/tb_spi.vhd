@@ -45,6 +45,7 @@ architecture Behavioral of tb_spi is
     signal ss_n : std_logic_vector(0 downto 0);
     signal rx_data : std_logic_vector(7 downto 0);
     signal busy : std_logic;
+    signal enable : std_logic;
 begin
 
 process begin
@@ -62,10 +63,10 @@ uut : entity work.spi
     port map(
         clock => clock,
         reset_n => reset_n,
-        enable => '1',
+        enable => enable,
         cpol => '1',
         cpha => '1',
-        cont => '1',
+        cont => '0',
         clk_div => 0,
         addr => 0,
         tx_data => x"1B",
@@ -76,5 +77,14 @@ uut : entity work.spi
         busy => busy,
         rx_data => rx_data
     );
+
+process begin
+    enable <= '0';
+    wait for PERIOD * 3;
+    enable <= '1';
+    wait for PERIOD * 2;
+    enable <= '0';
+    wait;
+end process;
 
 end Behavioral;
