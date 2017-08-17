@@ -1,0 +1,6 @@
+LDL 1
+ST 10
+ADD 10
+ST 10
+LD 10
+HALT
