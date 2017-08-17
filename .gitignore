@@ -1,2 +1,9 @@
 *.swp
 ~*
+*~
+
+*.a
+*.bin
+*.dat
+
+core/src/prom.v
