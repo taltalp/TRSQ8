@@ -1,5 +1,12 @@
-LDL 163
-ST 130
+LDL 1
+ST 10 # mask
+LDL 16 # 0x0F
+ST 130 # spi TX
 LDL 16
-ST 128
+ST 128 # write start
+LD 128
+AND 10
+SKZ
+GOTO 6 # still busy
+GOTO 4 # tx finish
 HALT
