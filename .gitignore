@@ -6,4 +6,5 @@
 *.bin
 *.dat
 
-core/src/prom.v
+core/src/prom.*
+tools/prom.*
