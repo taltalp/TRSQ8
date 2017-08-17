@@ -34,6 +34,11 @@ use IEEE.STD_LOGIC_ARITH.ALL;
 --use UNISIM.VComponents.all;
 
 entity spi_top is
+    Generic(
+        ADDR_LSB : integer := 0;
+        OPT_MEM_ADDR_BITS : integer := 1;
+        BASE_ADDR : STD_LOGIC_VECTOR(7 downto 0) := x"80"
+    );
     Port ( clk : in STD_LOGIC;
            reset_n : in STD_LOGIC;
            
@@ -53,8 +58,6 @@ entity spi_top is
 end spi_top;
 
 architecture Behavioral of spi_top is
-    constant ADDR_LSB : integer := 0;
-    constant OPT_MEM_ADDR_BITS : integer := 1;
     
     signal spi_busy : std_logic;
     signal spi_busy_tmp : std_logic;

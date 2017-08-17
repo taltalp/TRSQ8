@@ -49,14 +49,24 @@ architecture Behavioral of TRSQ8 is
     signal prom_addr : std_logic_vector(12 downto 0);
     signal prom_data : std_logic_vector(14 downto 0);
     
+    signal peri_addr : std_logic_vector(7 downto 0);
+    signal peri_din : std_logic_vector(7 downto 0);
+    signal peri_dout : std_logic_vector(7 downto 0);
+    signal peri_wr_en : std_logic;
+    signal peri_rd_en : std_logic;
+    
     signal ram_addr : std_logic_vector(7 downto 0);
-    signal ram_data_in : std_logic_vector(7 downto 0);
-    signal ram_data_out : std_logic_vector(7 downto 0);
-    signal wr_en : std_logic;
-    signal rd_en : std_logic;
+    signal ram_din  : std_logic_vector(7 downto 0);
+    signal ram_dout : std_logic_vector(7 downto 0);
+    signal ram_wr_en : std_logic;
+    signal ram_rd_en : std_logic;
+    
     -- user added
-    signal spi_addr : std_logic_vector(7 downto 0);
-    signal spi_data : std_logic_vector(7 downto 0);
+    signal spi_0_addr : std_logic_vector(7 downto 0);
+    signal spi_0_din  : std_logic_vector(7 downto 0);
+    signal spi_0_dout : std_logic_vector(7 downto 0);
+    signal spi_0_wr_en : std_logic;
+    signal spi_0_rd_en : std_logic;
 begin
 
 reset <= not reset_n;
@@ -68,11 +78,11 @@ cpu_inst: entity work.cpu
         STATUS => cpu_status,
         prom_addr => prom_addr,
         prom_data => prom_data,
-        addr => ram_addr,
-        data_in => ram_data_in,
-        data_out => ram_data_out,
-        wr_en => wr_en,
-        rd_en => rd_en,
+        addr => peri_addr,
+        data_in => peri_din,
+        data_out => peri_dout,
+        wr_en => peri_wr_en,
+        rd_en => peri_rd_en,
         irq_ip => irq
     );
 
@@ -90,45 +100,58 @@ RAM_process: process (clk) begin
             else
                 ram_i(0) <= cpu_status;
                 
-                if (wr_en = '1') then
+                if (ram_wr_en = '1') then
                     if (ram_addr /= x"00") then
-                        ram_i(conv_integer(ram_addr)) <= ram_data_out;
+                        ram_i(conv_integer(peri_addr)) <= ram_dout;
                     end if;
                 end if;
 --                ram_data_in <= ram_i(conv_integer(ram_addr));
             end if;
         end if;
     end process;
-    ram_data_in <= ram_i(conv_integer(ram_addr));
+    ram_din <= ram_i(conv_integer(peri_addr));
     
+
+-- ram_addr  <= peri_addr when (peri_addr >= x"00" and peri_addr <= x"7F") else x"00";
+-- ram_dout  <= peri_dout when (peri_addr >= x"00" and peri_addr <= x"7F") else x"00";
+ram_addr <= peri_addr;
+ram_dout <= peri_dout;
+ram_wr_en <= peri_wr_en when (peri_addr >= x"00" and peri_addr <= x"7F") else '0';
+ram_rd_en <= peri_rd_en when (peri_addr >= x"00" and peri_addr <= x"7F") else '0';
+
+peri_din  <= ram_din   when (peri_addr >= x"00" and peri_addr <= x"7F") else
+             spi_0_din when (peri_addr >= x"80" and peri_addr <= x"83") else
+             x"00";
+
 
     --
     -- ADD USER IPs
     --
---SWITCH : process (clk) begin
---    if (reset = '1') then
     
---    else
---        case (ram_addr) is
---            when x"00" => spi_addr <= ram_addr;
---        end case;
---    end if;
---end process;
+    spi_0_addr <= peri_addr;
+    spi_0_dout <= peri_dout;
+    spi_0_wr_en <= peri_wr_en when (peri_addr >= x"80" and peri_addr <= x"83") else '0';
+    spi_0_rd_en <= peri_rd_en when (peri_addr >= x"80" and peri_addr <= x"83") else '0';
     
---SPI_INST_0 : entity work.spi_top
---    port map(
---        clk => clk,
---        reset_n => reset_n,
+SPI_INST_0 : entity work.spi_top
+    generic map(
+        ADDR_LSB => 0,
+        OPT_MEM_ADDR_BITS => 1,
+        BASE_ADDR => x"80"
+    )
+    port map(
+        clk => clk,
+        reset_n => reset_n,
         
---        addr  => addr,
---        din   => din,
---        dout  => dout,
---        wr_en => wr_en,
---        rd_en => rd_en,
+        addr  => spi_0_addr,
+        din   => spi_0_din,
+        dout  => spi_0_dout,
+        wr_en => spi_0_wr_en,
+        rd_en => spi_0_rd_en,
         
---        sclk => sclk,
---        miso => miso,
---        mosi => mosi,
---        ss_n => ss_n
---    );
+        sclk => sclk,
+        miso => miso,
+        mosi => mosi,
+        ss_n => ss_n
+    );
 end Behavioral;
