@@ -21,12 +21,12 @@
 
 
 module cpu (
-    input       CLK_ip, reset_n_ip,
+    input       clk_ip, reset_n_ip,
     // program rom
     output reg [12:0] prom_addr,
     input       [14:0] prom_data,
     // peripheral bus
-    output      [7:0] out,
+    output      [7:0] addr,
     input       [7:0] data_in,
     output      [7:0] data_out,
     // interrupts
@@ -112,7 +112,7 @@ module cpu (
 
 
 	// STATUS REGISTER
-	always @ (posedge CLK_ip) begin
+	always @ (posedge clk_ip) begin
 		status_r <= {6'b0, alu_out_zf, alu_out_cf_r};  
 	end
 
@@ -129,7 +129,7 @@ module cpu (
 
 
 	// W Register
-	always @ (posedge CLK_ip) begin
+	always @ (posedge clk_ip) begin
 		if (reset == 1'b1) begin
 			alu_out_r    <= 8'h0;
 			alu_out_cf_r <= 1'b0;
@@ -152,7 +152,7 @@ module cpu (
     assign alu_out_zf = alu_out_r==8'h0 ? 1'b1: 1'b0; // ZERO flag
 
     // RAM
-    always @ (posedge CLK_ip) begin
+    always @ (posedge clk_ip) begin
     if (reset == 1'b1) begin : init_mem
         integer i;
         for (i=0;i<256;i=i+1)
@@ -171,7 +171,7 @@ module cpu (
     assign ram_dout = ram_i[ram_addr];
 
     // PC
- 	always @ (negedge CLK_ip) begin
+ 	always @ (negedge clk_ip) begin
 		if (reset == 1'b1) begin
 			prom_addr <= 13'h0;
 		end else if (halt_i == 1'b1) begin
@@ -198,7 +198,7 @@ module cpu (
     assign sk_i = (sk_sel[0] & ZF_s) | (sk_sel[1] & CF_s);
 
     // STATUS
-    always @ (posedge CLK_ip) begin
+    always @ (posedge clk_ip) begin
 		if (reset == 1'b1) begin
 			halt_r <= 1'b0;
 		end
@@ -209,7 +209,7 @@ module cpu (
 
 
 	// IRQ ( not tested )
-    always @ (posedge CLK_ip, irq_ip) begin
+    always @ (posedge clk_ip, irq_ip) begin
         if (irq_ip == 1'b1) begin
             irq_r[1] <= 1;
 		end else if (ram_addr == 8'd3) begin

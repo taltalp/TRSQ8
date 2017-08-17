@@ -24,18 +24,10 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_ARITH.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
-
 entity cpu is
     Port ( CLK_ip : in STD_LOGIC;
            reset_n_ip : in STD_LOGIC;
+           STATUS : out STD_LOGIC_VECTOR(7 downto 0);
            
            -- program rom
            prom_addr  : out std_logic_vector(12 downto 0);
@@ -45,6 +37,8 @@ entity cpu is
            addr       : out std_logic_vector(7 downto 0);
            data_in    : in std_logic_vector(7 downto 0);
            data_out   : out std_logic_vector(7 downto 0);
+           wr_en      : out std_logic;
+           rd_en      : out std_logic;
            
            -- interruputs
            irq_ip : in STD_LOGIC);
@@ -74,14 +68,12 @@ architecture Behavioral of cpu is
     signal muxa_sel : std_logic;
     signal muxb_sel : std_logic;
     
-    -- SRAM
-    type ram_t is array (0 to 255) of std_logic_vector(7 downto 0);
-    signal ram_i : ram_t;
-        
-    signal ram_addr : std_logic_vector(7 downto 0);
-    signal ram_dout : std_logic_vector(7 downto 0);
-    signal ram_ld : std_logic;
-    signal ram_st : std_logic;
+    -- Peripheral Interface
+    signal peri_addr : std_logic_vector(7 downto 0);
+    signal peri_dout : std_logic_vector(7 downto 0);
+    signal peri_din  : std_logic_vector(7 downto 0);
+    signal peri_wr_en : std_logic;
+    signal peri_rd_en : std_logic;
     
     signal nop_i  : std_logic;
     signal halt_i : std_logic;
@@ -125,6 +117,10 @@ architecture Behavioral of cpu is
 begin
 
     reset <= not reset_n_ip;
+    
+    addr <= peri_addr;
+    data_out <= peri_dout;
+    peri_din <= data_in;
 
 DECODER_INST : entity work.decoder
     port map(
@@ -133,9 +129,11 @@ DECODER_INST : entity work.decoder
         sk_sel_op  => sk_sel,
         muxa_sel_op => muxa_sel,
         muxb_sel_op => muxb_sel,
-        sram_addr_op => ram_addr,
-        sram_ld_op => ram_ld,
-        sram_st_op => ram_st,
+        sram_addr_op => peri_addr,
+--        sram_ld_op => ram_ld,
+--        sram_st_op => ram_st,
+        sram_ld_op => rd_en,
+        sram_st_op => wr_en,
         nop_op     => nop_i,
         halt_op    => halt_i,
         jump_op    => jmp_i,
@@ -154,6 +152,7 @@ ALU_INST : entity work.alu
     );
 
     -- STATUS REGISTER
+    STATUS <= status_r;
     process (CLK_ip) begin
         if (rising_edge(CLK_ip)) then
             status_r <= "000000" & alu_out_zf & alu_out_cf_r;
@@ -164,7 +163,7 @@ ALU_INST : entity work.alu
 
     -- MUX A
     alu_in_a <= prom_data(7 downto 0) when muxa_sel = '1' else
-                ram_dout;
+                peri_din;
     -- MUX B
     alu_in_b <= decode3to8(prom_data(10 downto 8)) when muxb_sel = '1' else
                 alu_out_r;
@@ -191,27 +190,9 @@ ALU_INST : entity work.alu
             end if;
         end if;
     end process;
+    peri_dout <= alu_out_r;
 
     alu_out_zf <= '1' when alu_out_r = x"00" else '0';
-
-    -- RAM
-    process (CLK_ip) begin
-        if (rising_edge(CLK_ip)) then
-            if (reset = '1') then
-                ram_i <= (others => x"00");
-            else
-                ram_i(0) <= status_r;
-                
-                if (ram_st = '1') then
-                    if (ram_addr /= x"00") then
-                        ram_i(conv_integer(ram_addr)) <= alu_out_r;
-                    end if;
-                end if;
-            end if;
-        end if;
-    end process;
-
-    ram_dout <= ram_i(conv_integer(ram_addr));
 
     -- PC
     process (CLK_ip) begin
@@ -260,7 +241,7 @@ ALU_INST : entity work.alu
         if (irq_ip = '1') then
             irq_r(1) <= '1';
         elsif (rising_edge(CLK_ip)) then
-            if (ram_addr = x"03") then
+            if (peri_addr = x"03") then
                 irq_r <= alu_out_r;
             end if;
         end if;

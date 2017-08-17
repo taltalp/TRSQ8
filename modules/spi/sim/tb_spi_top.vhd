@@ -94,6 +94,11 @@ process begin
     wr_en <= '1';
     wait for PERIOD;
     wr_en <= '0';
+    wait for PERIOD * 5;
+    addr <= x"00";
+    rd_en <= '1';
+    wait for PERIOD;
+    rd_en <= '0';
     wait;
 end process;
 
