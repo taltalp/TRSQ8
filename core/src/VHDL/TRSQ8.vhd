@@ -144,8 +144,8 @@ SPI_INST_0 : entity work.spi_top
         reset_n => reset_n,
         
         addr  => spi_0_addr,
-        din   => spi_0_din,
-        dout  => spi_0_dout,
+        din   => spi_0_dout,
+        dout  => spi_0_din,
         wr_en => spi_0_wr_en,
         rd_en => spi_0_rd_en,
         
