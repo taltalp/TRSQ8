@@ -22,13 +22,16 @@
 
 module cpu (
     input       clk_ip, reset_n_ip,
+    // registers
+    output reg [7:0] STATUS,
     // program rom
     output reg [12:0] prom_addr,
-    input       [14:0] prom_data,
+    input      [14:0] prom_data,
     // peripheral bus
     output      [7:0] addr,
     input       [7:0] data_in,
     output      [7:0] data_out,
+    output      wr_en, rd_en,
     // interrupts
     input       irq_ip);
 
@@ -47,10 +50,8 @@ module cpu (
 
     wire muxa_sel, muxb_sel;
 
-    reg  [7:0] ram_i [0:255];
-    wire [7:0] ram_addr;
-    wire [7:0] ram_dout;
-    wire       ram_ld, ram_st;
+    wire [7:0] peri_addr, peri_dout, peri_din;
+    wire peri_wr_en, peri_rd_en;
 
     wire       nop_i, halt_i, sk_i;
     wire [1:0] sk_sel;
@@ -82,6 +83,9 @@ module cpu (
 	endfunction
 
     assign reset = ~ reset_n_ip;
+    assign addr = peri_addr;
+    assign data_out = peri_dout;
+    assign peri_din = data_in;
 
     decoder decoder_inst (
     	.data_ip(prom_data),
@@ -89,9 +93,9 @@ module cpu (
 		.sk_sel_op(sk_sel),
 		.muxa_sel_op(muxa_sel),
 		.muxb_sel_op(muxb_sel),
-		.sram_addr_op(ram_addr),
-		.sram_ld_op(ram_ld),
-		.sram_st_op(ram_st),
+		.sram_addr_op(peri_addr),
+		.sram_ld_op(rd_en),
+		.sram_st_op(wr_en),
 		.nop_op(nop_i),
 		.halt_op(halt_i),
 		.jump_op(jmp_i),
@@ -112,7 +116,7 @@ module cpu (
 
 	// STATUS REGISTER
 	always @ (posedge clk_ip) begin
-		status_r <= {6'b0, alu_out_zf, alu_out_cf_r};  
+		STATUS <= {6'b0, alu_out_zf, alu_out_cf_r};  
 	end
 
 	assign CF_s = status_r[0];
@@ -120,7 +124,7 @@ module cpu (
 
 
 	// MUX A
-	assign alu_in_a = muxa_sel == 1'b1 ? prom_data[7:0] : ram_dout;
+	assign alu_in_a = muxa_sel == 1'b1 ? prom_data[7:0] : peri_din;
 
 
 	// MUX B
@@ -147,28 +151,9 @@ module cpu (
             alu_out_cf_r <= alu_out_cf;
         end
 	end
+	assign peri_dout = alu_out_r;
 
     assign alu_out_zf = alu_out_r==8'h0 ? 1'b1: 1'b0; // ZERO flag
-
-    // RAM
-    always @ (posedge clk_ip) begin
-        if (reset == 1'b1) begin : init_mem
-            integer i;
-            for (i=0;i<256;i=i+1) begin
-                ram_i[i] <= 8'h00;
-            end
-        end else begin
-            ram_i[0] <= status_r;
-                
-            if (ram_st == 1'b1) begin
-                if (ram_addr != 8'h00) begin
-                    ram_i[ram_addr] <= alu_out_r;
-                end
-            end
-        end	
-    end
-    
-    assign ram_dout = ram_i[ram_addr];
 
     // PC
  	always @ (negedge clk_ip) begin
@@ -212,7 +197,7 @@ module cpu (
     always @ (posedge clk_ip, irq_ip) begin
         if (irq_ip == 1'b1) begin
             irq_r[1] <= 1;
-		end else if (ram_addr == 8'd3) begin
+		end else if (peri_addr == 8'd3) begin
 			irq_r <= alu_out_r;
 		end
 	end	
