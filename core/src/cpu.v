@@ -37,7 +37,6 @@ module cpu (
 
     wire [12:0] prom_addr_i;
     reg  [12:0] prom_stack;
-    wire [14:0] prom_dout;
 
     wire [7:0] alu_in_a, alu_in_b;
     wire [4:0] alu_in_sel;
@@ -121,11 +120,11 @@ module cpu (
 
 
 	// MUX A
-	assign alu_in_a = muxa_sel == 1'b1 ? prom_dout[7:0] : ram_dout;
+	assign alu_in_a = muxa_sel == 1'b1 ? prom_data[7:0] : ram_dout;
 
 
 	// MUX B
-	assign alu_in_b = muxb_sel == 1'b1 ? decode3to8(prom_dout[10:8]) : alu_out_r;
+	assign alu_in_b = muxb_sel == 1'b1 ? decode3to8(prom_data[10:8]) : alu_out_r;
 
 
 	// W Register
@@ -153,19 +152,20 @@ module cpu (
 
     // RAM
     always @ (posedge clk_ip) begin
-    if (reset == 1'b1) begin : init_mem
-        integer i;
-        for (i=0;i<256;i=i+1)
-            ram_i[i] <= 8'h00;
+        if (reset == 1'b1) begin : init_mem
+            integer i;
+            for (i=0;i<256;i=i+1) begin
+                ram_i[i] <= 8'h00;
+            end
         end else begin
             ram_i[0] <= status_r;
-            
+                
             if (ram_st == 1'b1) begin
                 if (ram_addr != 8'h00) begin
                     ram_i[ram_addr] <= alu_out_r;
                 end
             end
-		end	
+        end	
     end
     
     assign ram_dout = ram_i[ram_addr];
@@ -178,7 +178,7 @@ module cpu (
             prom_addr <= prom_addr;
         end else begin
             if (jmp_i == 1'b1) begin
-                prom_addr <= prom_dout[12:0];
+                prom_addr <= prom_data[12:0];
             end else if (sk_i == 1'b1) begin
         		prom_addr <= prom_addr + 2;
         	end else if ( (irq_i == 1'b1) && (irq_pre_i == 1'b0) ) begin
