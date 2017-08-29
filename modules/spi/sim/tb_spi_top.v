@@ -69,8 +69,10 @@ module tb_spi_top(
         din <= 8'h00;
         wr_en <= 1'b0;
         rd_en <= 1'b0;
-        #PERIOD;
+        #(PERIOD * 2);
         reset_n <= 1'b0;
+        #PERIOD;
+        reset_n <= 1'b1;
         #PERIOD;
         addr <= 8'h02;
         din <= 8'hA1;
