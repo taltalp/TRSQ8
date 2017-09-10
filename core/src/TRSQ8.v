@@ -24,9 +24,11 @@ module TRSQ8(
     input  clk, reset_n,
     input  irq,
     
-    output sclk, mosi,
-    input  miso,
-    output [0:0] ss_n
+//    output sclk, mosi,
+//    input  miso,
+//    output [0:0] ss_n,
+    
+    inout [7:0] gpio_0_port
     );
     
     wire reset;
@@ -53,6 +55,11 @@ module TRSQ8(
     wire [7:0] spi_0_din;
     wire [7:0] spi_0_dout;
     wire spi_0_wr_en, spi_0_rd_en;
+    
+    wire [7:0] gpio_0_addr;
+    wire [7:0] gpio_0_din;
+    wire [7:0] gpio_0_dout;
+    wire gpio_0_wr_en, gpio_0_rd_en;
     
     assign reset = ~reset_n;
     
@@ -102,6 +109,7 @@ module TRSQ8(
     
     assign peri_din = (peri_addr >= 8'h00 & peri_addr <= 8'h7F) ? ram_din :
                       (peri_addr >= 8'h80 & peri_addr <= 8'h83) ? spi_0_din :
+                      (peri_addr >= 8'h84 & peri_addr <= 8'h87) ? gpio_0_din :
                       8'h00;
                       
     // ADD User Logic 
@@ -109,4 +117,27 @@ module TRSQ8(
     assign spi_0_dout = peri_dout;
     assign spi_0_wr_en = (peri_addr >= 8'h80 & peri_addr <= 8'h83) ? 1'b1 : 1'b0;
     assign spi_0_rd_en = (peri_addr >= 8'h80 & peri_addr <= 8'h83) ? 1'b1 : 1'b0;
+    
+    assign gpio_0_addr = peri_addr;
+    assign gpio_0_dout = peri_dout;
+    assign gpio_0_wr_en = (peri_addr >= 8'h84 & peri_addr <= 8'h87) ? 1'b1 : 1'b0;
+    assign gpio_0_rd_en = (peri_addr >= 8'h84 & peri_addr <= 8'h87) ? 1'b1 : 1'b0;
+    
+    gpio #(
+        .ADDR_LSB(0),
+        .OPT_MEM_ADDR_BITS(1)
+    )gpio_0_inst(
+        .clk(clk), 
+        .reset_n(reset_n),
+        
+        // CPU Interface
+        .addr(gpio_0_addr),
+        .din(gpio_0_din),
+        .dout(gpio_0_dout),
+        .wr_en(gpio_0_wr_en),
+        .rd_en(gpio_0_rd_en),
+        
+        // GPIO Interface
+        .port(gpio_0_port)
+    );
 endmodule

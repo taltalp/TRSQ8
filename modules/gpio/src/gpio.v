@@ -18,12 +18,11 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-
+// `define vivado
 
 module gpio #(
     parameter ADDR_LSB = 0,
-    parameter OPT_MEM_ADDR_BITS = 1,
-    parameter BASE_ADDR = 8'h80
+    parameter OPT_MEM_ADDR_BITS = 1
     )(
     input clk, reset_n,
     
@@ -32,7 +31,7 @@ module gpio #(
     output reg [7:0] dout,
     input wr_en, rd_en,
     
-    // SPI Interface
+    // GPIO Interface
     inout [7:0] port
     );
     
@@ -61,5 +60,25 @@ module gpio #(
             endcase
         end
     end
+    
+    `ifdef vivado
+        generate
+            genvar i;
+            for (i=0; i<8; i=i+1)
+            begin: iobuf_loop
+                IOBUF #(
+                  .DRIVE(12), // Specify the output drive strength
+                  .IBUF_LOW_PWR("TRUE"),  // Low Power - "TRUE", High Performance = "FALSE" 
+                  .IOSTANDARD("DEFAULT"), // Specify the I/O standard
+                  .SLEW("SLOW") // Specify the output slew rate
+               ) IOBUF_inst (
+                  .O(IGPIO[i]),     // Buffer output
+                  .IO(port[i]),     // Buffer inout port (connect directly to top-level port)
+                  .I(OGPIO[i]),     // Buffer input
+                  .T(TRIS[i])       // 3-state enable input, high=input, low=output
+               );
+            end
+        endgenerate
+    `endif
     
 endmodule
