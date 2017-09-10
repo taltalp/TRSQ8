@@ -18,7 +18,7 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-// `define vivado
+`define vivado
 
 module gpio #(
     parameter ADDR_LSB = 0,
@@ -39,6 +39,8 @@ module gpio #(
     reg [7:0] OGPIO = 8'h00; 
     reg [7:0] IGPIO = 8'h00;
     reg [7:0] DUMMY = 8'h00;
+    
+    wire [7:0] ibuf;
     
     wire [OPT_MEM_ADDR_BITS:0] loc_addr = addr[ADDR_LSB + OPT_MEM_ADDR_BITS:ADDR_LSB];
     always @(posedge clk) begin
@@ -62,6 +64,9 @@ module gpio #(
                 default : dout <= 8'h00;
             endcase
         end
+        
+        // fetch buffer input to registers
+        IGPIO <= ibuf;
     end
     
     `ifdef vivado
@@ -75,7 +80,7 @@ module gpio #(
                   .IOSTANDARD("DEFAULT"), // Specify the I/O standard
                   .SLEW("SLOW") // Specify the output slew rate
                ) IOBUF_inst (
-                  .O(IGPIO[i]),     // Buffer output
+                  .O(ibuf[i]),     // Buffer output
                   .IO(port[i]),     // Buffer inout port (connect directly to top-level port)
                   .I(OGPIO[i]),     // Buffer input
                   .T(TRIS[i])       // 3-state enable input, high=input, low=output
