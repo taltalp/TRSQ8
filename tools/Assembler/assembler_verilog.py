@@ -92,7 +92,7 @@ if __name__ == '__main__':
                 'endmodule\n'
                 ]
 
-        text.writelines('-- ' + args.path + '\n')
+        text.writelines('// ' + args.path + '\n')
         text.writelines(vhdl_text_0)
 
         i = 0
