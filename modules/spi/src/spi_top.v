@@ -22,8 +22,7 @@
 
 module spi_top #(
     parameter ADDR_LSB = 0,
-    parameter OPT_MEM_ADDR_BITS = 1,
-    parameter BASE_ADDR = 8'h80
+    parameter OPT_MEM_ADDR_BITS = 1
     )(
     input clk, reset_n,
     

@@ -1,0 +1,17 @@
+gpio #(
+    .ADDR_LSB(0),
+    .OPT_MEM_ADDR_BITS(1)
+)gpio_$X_inst(
+    .clk(clk), 
+    .reset_n(reset_n),
+        
+    // CPU Interface
+    .addr(gpio_$X_addr),
+    .din(gpio_$X_dout),
+    .dout(gpio_$X_din),
+    .wr_en(gpio_$X_wr_en),
+    .rd_en(gpio_$X_rd_en),
+    
+    // GPIO Interface
+    .port(gpio_$X_port)
+);

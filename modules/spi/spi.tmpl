@@ -1,0 +1,20 @@
+spi_top #(
+    .ADDR_LSB(0),
+    .OPT_MEM_ADDR_BITS(1)
+)spi_$X_inst(
+    .clk(clk),
+    .reset_n(reset_n),
+    
+    // CPU Interface
+    .addr(spi_$X_addr),
+    .din(spi_$X_dout),
+    .dout(spi_$X_din),
+    .wr_en(spi_$X_wr_en),
+    .rd_en(spi_$X_rd_en),
+    
+    // SPI Interface
+    .sclk(spi_$X_sclk),
+    .mosi(spi_$X_mosi),
+    .miso(spi_$X_miso),
+    .ss_n(spi_$X_ss_n)
+    );
