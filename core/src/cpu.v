@@ -1,22 +1,8 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
 // Create Date: 2017/08/17 00:59:30
-// Design Name: 
 // Module Name: cpu
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
+// Project Name: TRSQ8
 //////////////////////////////////////////////////////////////////////////////////
 
 
@@ -194,7 +180,7 @@ module cpu (
 
 
 	// IRQ ( not tested )
-    always @ (posedge clk_ip, irq_ip) begin
+    always @ (posedge clk_ip, posedge irq_ip) begin
         if (irq_ip == 1'b1) begin
             irq_r[1] <= 1;
 		end else if (peri_addr == 8'd3) begin

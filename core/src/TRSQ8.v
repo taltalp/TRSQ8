@@ -1,27 +1,13 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
 // Create Date: 2017/08/17 02:29:04
-// Design Name: 
 // Module Name: TRSQ8
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
+// Project Name: TRSQ8
 //////////////////////////////////////////////////////////////////////////////////
 
 
 module TRSQ8(
-    input  clk, reset_n,
+    input  clk, reset,
     input  irq,
     
 //    output sclk, mosi,
@@ -31,7 +17,7 @@ module TRSQ8(
     inout [7:0] gpio_0_port
     );
     
-    wire reset;
+    wire reset_n;
     
     wire [7:0] cpu_status;
     
@@ -61,7 +47,7 @@ module TRSQ8(
     wire [7:0] gpio_0_dout;
     wire gpio_0_wr_en, gpio_0_rd_en;
     
-    assign reset = ~reset_n;
+    assign reset_n = ~reset;
     
     cpu cpu_inst(
         .clk_ip(clk),
