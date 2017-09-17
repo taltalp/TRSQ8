@@ -8,7 +8,7 @@
 
 module TRSQ8(
     input  clk, reset,
-    input  irq,
+    // input  irq,
     
     output spi_0_sclk, spi_0_mosi,
     input  spi_0_miso,
@@ -60,7 +60,8 @@ module TRSQ8(
         .data_out(peri_dout),
         .wr_en(peri_wr_en),
         .rd_en(peri_rd_en),
-        .irq_ip(irq)
+        //.irq_ip(irq)
+        .irq_ip(0)
     );
     
     prom prom_inst(

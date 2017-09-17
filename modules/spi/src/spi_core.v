@@ -36,7 +36,7 @@ module spi_core #(
     reg [D_WIDTH-1:0] tx_buffer;
     integer last_bit_rx;
     
-    always @(clock, reset_n) begin
+    always @(posedge clock, negedge reset_n) begin
         if (!reset_n) begin
             busy <= 1;
             ss_n <= {`SS_N_LEN{1'b0}};

@@ -33,7 +33,7 @@ module spi_top #(
     wire [OPT_MEM_ADDR_BITS:0] loc_addr = addr[ADDR_LSB + OPT_MEM_ADDR_BITS:ADDR_LSB];
     always @(clk) begin
         if (clk == 1'b1) begin
-            if (wr_en == 1'b1) begin
+            if (wr_en) begin
                 case (loc_addr)
                     2'b00 : SPICON <= din;
                     2'b01 : SPICLKDIV <= din;
@@ -46,7 +46,7 @@ module spi_top #(
                               SPIRX <= SPIRX;
                               end
                 endcase
-            end else if (rd_en == 1'b1) begin
+            end else if (rd_en) begin
                 case (loc_addr)
                     2'b00 : dout <= SPICON;
                     2'b01 : dout <= SPICLKDIV;
@@ -69,8 +69,8 @@ module spi_top #(
     
     spi_core  
     #(
-        .slaves(1),
-        .d_witdh(8)
+        .SLAVES(1),
+        .D_WIDTH(8)
     )
     spi_core_inst
     (
