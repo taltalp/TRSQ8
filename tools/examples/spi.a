@@ -1,11 +1,11 @@
 LDL 1
 ST 10 # mask
-LDL 16 # 0x0F
-ST 130 # spi TX
-LDL 16
-ST 128 # write start
-LD 128
-AND 10
+LDL 170 # 0xAA
+ST 130 # spi TX (0x82)
+LDL 16 # 0x10
+ST 128 # write start (0x80)
+LD 128 # read spi status register
+AND 10 # status & 0x01
 SKZ
 GOTO 6 # still busy
 GOTO 4 # tx finish

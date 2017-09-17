@@ -49,7 +49,7 @@ def assembler(line):
     return bit
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='TRSQ-8 assembler')
+    parser = argparse.ArgumentParser(description='TRSQ-8 assembler (verilog version)')
     parser.add_argument('path')
     args = parser.parse_args()
     
@@ -77,8 +77,8 @@ if __name__ == '__main__':
             text.write('\n')
 
     # write VHDL entity file
-    with open('./prom.vhd', 'w', encoding='utf-8-sig') as text:
-        vhdl_text_0 = [
+    with open('./prom.v', 'w', encoding='utf-8-sig') as text:
+        hdl_text_0 = [
                 'module prom (\n',
                 '    input CLK_ip,\n',
                 '    input [12:0] ADDR_ip,\n',
@@ -87,13 +87,13 @@ if __name__ == '__main__':
                 '    assign DATA_op = \n'
                 ]
 
-        vhdl_text_1 = [
+        hdl_text_1 = [
                 '                           15\'b000000000000000;\n',
                 'endmodule\n'
                 ]
 
         text.writelines('// ' + args.path + '\n')
-        text.writelines(vhdl_text_0)
+        text.writelines(hdl_text_0)
 
         i = 0
         for line in bit:
@@ -106,4 +106,4 @@ if __name__ == '__main__':
                         )
                 i += 1
 
-        text.writelines(vhdl_text_1);
+        text.writelines(hdl_text_1);
