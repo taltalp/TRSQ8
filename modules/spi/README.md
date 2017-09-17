@@ -19,3 +19,10 @@
 |2  |cpha      |clock phase                |
 |1  |cpol      |clock polarity             |
 |0  |spi busy  |spi module is busy         |
+
+## SPICLKDIV register
+This is a reserved register.
+
+## SPITX register
+
+## SPIRX register
