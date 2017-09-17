@@ -96,7 +96,7 @@ module cpu (
 		.SEL_ip(alu_in_sel),
 		.O_op(alu_out),
 		.CF_op(alu_out_cf),
-		.ZF_op()
+		.ZF_op(alu_out_zf)
 	);
 
 
@@ -105,8 +105,8 @@ module cpu (
 		STATUS <= {6'b0, alu_out_zf, alu_out_cf_r};  
 	end
 
-	assign CF_s = status_r[0];
-	assign ZF_s = status_r[1];
+	assign CF_s = STATUS[0];
+	assign ZF_s = STATUS[1];
 
 
 	// MUX A

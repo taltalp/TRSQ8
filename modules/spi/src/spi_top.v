@@ -25,7 +25,10 @@ module spi_top #(
     
     wire spi_busy, spi_rx;
     reg  spi_enable, spi_busy_tmp;
-    reg [7:0] SPICON, SPICLKDIV, SPITX, SPIRX;
+    reg [7:0] SPICON    = 8'h00; 
+    reg [7:0] SPICLKDIV = 8'h00; 
+    reg [7:0] SPITX     = 8'h00;
+    reg [7:0] SPIRX     = 8'h00;
     
     wire [OPT_MEM_ADDR_BITS:0] loc_addr = addr[ADDR_LSB + OPT_MEM_ADDR_BITS:ADDR_LSB];
     always @(clk) begin

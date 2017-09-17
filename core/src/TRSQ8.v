@@ -10,9 +10,9 @@ module TRSQ8(
     input  clk, reset,
     input  irq,
     
-//    output sclk, mosi,
-//    input  miso,
-//    output [0:0] ss_n,
+    output spi_0_sclk, spi_0_mosi,
+    input  spi_0_miso,
+    output [0:0] spi_0_cs,
     
     inout [7:0] gpio_0_port
     );
@@ -90,8 +90,8 @@ module TRSQ8(
     
     assign ram_addr = peri_addr;
     assign ram_dout = peri_dout;
-    assign ram_wr_en = (peri_addr >= 8'h00 & peri_addr <= 8'h7F) ? 1'b1 : 1'b0;
-    assign ram_rd_en = (peri_addr >= 8'h00 & peri_addr <= 8'h7F) ? 1'b1 : 1'b0;
+    assign ram_wr_en = (peri_addr >= 8'h00 & peri_addr <= 8'h7F) ? peri_wr_en : 1'b0;
+    assign ram_rd_en = (peri_addr >= 8'h00 & peri_addr <= 8'h7F) ? peri_rd_en : 1'b0;
     
     assign peri_din = (peri_addr >= 8'h00 & peri_addr <= 8'h7F) ? ram_din :
                       (peri_addr >= 8'h80 & peri_addr <= 8'h83) ? spi_0_din :
@@ -101,13 +101,13 @@ module TRSQ8(
     // ADD User Logic 
     assign spi_0_addr = peri_addr;
     assign spi_0_dout = peri_dout;
-    assign spi_0_wr_en = (peri_addr >= 8'h80 & peri_addr <= 8'h83) ? 1'b1 : 1'b0;
-    assign spi_0_rd_en = (peri_addr >= 8'h80 & peri_addr <= 8'h83) ? 1'b1 : 1'b0;
+    assign spi_0_wr_en = (peri_addr >= 8'h80 & peri_addr <= 8'h83) ? peri_wr_en : 1'b0;
+    assign spi_0_rd_en = (peri_addr >= 8'h80 & peri_addr <= 8'h83) ? peri_rd_en : 1'b0;
     
     assign gpio_0_addr = peri_addr;
     assign gpio_0_dout = peri_dout;
-    assign gpio_0_wr_en = (peri_addr >= 8'h84 & peri_addr <= 8'h87) ? 1'b1 : 1'b0;
-    assign gpio_0_rd_en = (peri_addr >= 8'h84 & peri_addr <= 8'h87) ? 1'b1 : 1'b0;
+    assign gpio_0_wr_en = (peri_addr >= 8'h84 & peri_addr <= 8'h87) ? peri_wr_en : 1'b0;
+    assign gpio_0_rd_en = (peri_addr >= 8'h84 & peri_addr <= 8'h87) ? peri_rd_en : 1'b0;
     
     gpio #(
         .ADDR_LSB(0),
@@ -125,5 +125,26 @@ module TRSQ8(
         
         // GPIO Interface
         .port(gpio_0_port)
+    );
+    
+    spi_top #(
+        .ADDR_LSB(0),
+        .OPT_MEM_ADDR_BITS(1)
+    )spi_0_inst(
+        .clk(clk),
+        .reset_n(reset_n),
+        
+        // CPU Interface
+        .addr(spi_0_addr),
+        .din(spi_0_dout),
+        .dout(spi_0_din),
+        .wr_en(spi_0_wr_en),
+        .rd_en(spi_0_rd_en),
+        
+        // SPI Interface
+        .sclk(spi_0_sclk),
+        .mosi(spi_0_mosi),
+        .miso(spi_0_miso),
+        .ss_n(spi_0_cs)
     );
 endmodule
