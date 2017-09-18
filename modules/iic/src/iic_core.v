@@ -1,28 +1,13 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
 // Create Date: 2017/09/18 01:08:52
-// Design Name: 
 // Module Name: iic_core
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
+// Project Name: TRSQ8
 //////////////////////////////////////////////////////////////////////////////////
-
 
 module iic_core(
     input  clock, reset_n,
-    output reg busy,
+    output reg busy, sending,
     input  start, stop, rw, // rw = 1 -> read
     input  [7:0] din,
     output reg [7:0] dout,
@@ -53,15 +38,19 @@ module iic_core(
     
     always @(posedge clock) begin
         if (!reset_n) begin
-            din_r <= 0;
-            sck <= 1'b1;
+            din_r  <= 0;
+            dout   <= 0;
+            dout_r <= 0;
+            sck   <= 1'b1;
             sda_r <= 1'b1;
             sda_t <= 1'b1;
             busy  <= 1'b0;
+            sending <= 1'b0;
             bit_cnt <= 3'h7;
             state_r = STATE_IDLE;
         end else begin
             case (state_r)
+                // IIC Idle Condition
                 STATE_IDLE: begin
                     sck   <= 1'b1;
                     sda_r <= 1'b1;
@@ -69,9 +58,11 @@ module iic_core(
                     if (start) begin
                         din_r <= din;
                         busy <= 1'b1;
+                        sending <= 1'b1;
                         state_r <= STATE_START_0;
                     end else begin
                         busy <= 1'b0;
+                        sending <= 1'b0;
                         state_r <= STATE_IDLE;
                     end
                 end
@@ -82,6 +73,7 @@ module iic_core(
                     sda_r <= 1'b0;
                     sda_t <= 1'b1;
                     busy  <= 1'b1;
+                    sending <= 1'b1;
                     state_r <= STATE_START_1;
                 end
                 
@@ -91,6 +83,7 @@ module iic_core(
                     sda_t <= 1'b1;
                     bit_cnt <= 3'h7;
                     busy  <= 1'b1;
+                    sending <= 1'b1;
                     state_r <= STATE_WRITE_0;
                 end
                 
@@ -101,6 +94,7 @@ module iic_core(
                     sda_t <= 1'b1;
                     din_r <= {din_r[6:0], 1'b0};
                     busy  <= 1'b1;
+                    sending <= 1'b1;
                     state_r <= STATE_WRITE_1;
                 end
                 
@@ -109,6 +103,7 @@ module iic_core(
                     sda_r <= sda_r;
                     sda_t <= 1'b1;
                     busy  <= 1'b1;
+                    sending <= 1'b1;
                     
                     if (bit_cnt == 0) begin
                         bit_cnt <= 3'h7;
@@ -124,6 +119,7 @@ module iic_core(
                     sck   <= 1'b0;
                     sda_t <= 1'b0;
                     busy  <= 1'b1;
+                    sending <= 1'b1;
                     state_r <= STATE_READ_0;
                 end
                 
@@ -131,6 +127,7 @@ module iic_core(
                     sck   <= 1'b1;
                     sda_t <= 1'b0;
                     busy  <= 1'b1;
+                    sending <= 1'b1;
                     dout_r <= {dout_r[6:0], sda};
                     
                     if (bit_cnt == 0) begin
@@ -147,6 +144,7 @@ module iic_core(
                     sck   <= 1'b0;
                     sda_r <= 1'b1;
                     busy  <= 1'b0;
+                    sending <= 1'b1;
                     dout  <= dout_r;
                     
                     if (start) begin
@@ -161,24 +159,26 @@ module iic_core(
                     end
                 end
                 
+                // IIC Stop Condition
                 STATE_STOP_0: begin
-                    sck  <= 1'b1;
-                    sda_r <= 1'b0;
-                    sda_t <= 1'b1;
+                    sck     <= 1'b1;
+                    sda_r   <= 1'b0;
+                    sda_t   <= 1'b1;
+                    busy    <= 1'b1;
+                    sending <= 1'b1;
                     state_r <= STATE_STOP_1;
                 end
                 
                 STATE_STOP_1: begin
-                    sck  <= 1'b1;
-                    sda_r <= 1'b1;
-                    sda_t <= 1'b1;
+                    sck     <= 1'b1;
+                    sda_r   <= 1'b1;
+                    sda_t   <= 1'b1;
+                    busy    <= 1'b1;
+                    sending <= 1'b1;
                     state_r <= STATE_IDLE;
                 end
                 
                 default: begin
-                    sck   <= 1'b1;
-                    sda_r <= 1'b1;
-                    sda_t <= 1'b1;
                     state_r <= STATE_IDLE;
                 end
             endcase

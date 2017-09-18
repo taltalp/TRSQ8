@@ -25,7 +25,7 @@ module tb_iic();
     parameter PERIOD = 10;
         
     reg clk, reset_n;
-    wire busy;
+    wire busy, sending;
     reg start, stop, rw;
     reg [7:0] din;
     wire [7:0] dout;
@@ -41,6 +41,7 @@ module tb_iic();
         .clock(clk),
         .reset_n(reset_n),
         .busy(busy),
+        .sending(sending),
         .start(start),
         .stop(stop),
         .rw(rw),
