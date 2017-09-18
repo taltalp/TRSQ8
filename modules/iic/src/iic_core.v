@@ -152,12 +152,12 @@ module iic_core(
                     sck   <= 1'b0;
                     sda_r <= 1'b1;
                     sda_t <= 1'b1;
-                    busy  <= 1'b0;
                     bit_cnt <= 4'h8;
                     sending <= 1'b1;
                     dout  <= dout_r; // update dout
                     
                     if (start) begin
+                        busy  <= 1'b1;
                         if (rw) begin
                             state_r <= STATE_READ_0;
                         end else begin
@@ -165,7 +165,10 @@ module iic_core(
                             state_r <= STATE_WRITE_0;
                         end
                     end else if (stop) begin
+                        busy  <= 1'b1;
                         state_r <= STATE_STOP_0;
+                    end else begin
+                        busy  <= 1'b0;
                     end
                 end
                 
