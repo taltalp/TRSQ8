@@ -32,7 +32,7 @@ module iic_core(
     
     reg [7:0] din_r, dout_r; 
     
-    reg [2:0] bit_cnt;
+    reg [3:0] bit_cnt;
     
     assign sda = sda_t ? sda_r : 1'bZ; // tri-state pin
     
@@ -46,7 +46,7 @@ module iic_core(
             sda_t <= 1'b1;
             busy  <= 1'b0;
             sending <= 1'b0;
-            bit_cnt <= 3'h7;
+            bit_cnt <= 4'h8;
             state_r = STATE_IDLE;
         end else begin
             case (state_r)
@@ -81,7 +81,7 @@ module iic_core(
                     sck   <= 1'b0;
                     sda_r <= 1'b0;
                     sda_t <= 1'b1;
-                    bit_cnt <= 3'h7;
+                    bit_cnt <= 4'h8;
                     busy  <= 1'b1;
                     sending <= 1'b1;
                     state_r <= STATE_WRITE_0;
@@ -90,9 +90,13 @@ module iic_core(
                 // IIC Write Condition
                 STATE_WRITE_0: begin
                     sck   <= 1'b0;
-                    sda_r <= din_r[7];
-                    sda_t <= 1'b1;
-                    din_r <= {din_r[6:0], 1'b0};
+                    if (bit_cnt == 0) begin
+                        sda_t <= 1'b0; // Hi-Z
+                    end else begin
+                        sda_r <= din_r[7];
+                        sda_t <= 1'b1;
+                        din_r <= {din_r[6:0], 1'b0};
+                    end
                     busy  <= 1'b1;
                     sending <= 1'b1;
                     state_r <= STATE_WRITE_1;
@@ -101,15 +105,14 @@ module iic_core(
                 STATE_WRITE_1: begin
                     sck   <= 1'b1;
                     sda_r <= sda_r;
-                    sda_t <= 1'b1;
                     busy  <= 1'b1;
                     sending <= 1'b1;
                     
                     if (bit_cnt == 0) begin
-                        bit_cnt <= 3'h7;
+                        bit_cnt <= 4'h8;
                         state_r <= STATE_WAIT;
                     end else begin
-                        bit_cnt <= bit_cnt - 3'h1;
+                        bit_cnt <= bit_cnt - 4'h1;
                         state_r <= STATE_WRITE_0;
                     end
                 end
@@ -117,7 +120,12 @@ module iic_core(
                 // IIC Read Condition
                 STATE_READ_0: begin
                     sck   <= 1'b0;
-                    sda_t <= 1'b0;
+                    if (bit_cnt == 0) begin
+                        sda_r <= 1'b1; // ACK
+                        sda_t <= 1'b1; // output
+                    end else begin
+                        sda_t <= 1'b0;
+                    end
                     busy  <= 1'b1;
                     sending <= 1'b1;
                     state_r <= STATE_READ_0;
@@ -125,16 +133,16 @@ module iic_core(
                 
                 STATE_READ_1: begin
                     sck   <= 1'b1;
-                    sda_t <= 1'b0;
                     busy  <= 1'b1;
                     sending <= 1'b1;
-                    dout_r <= {dout_r[6:0], sda};
+                    
                     
                     if (bit_cnt == 0) begin
-                        bit_cnt <= 3'h7;
+                        bit_cnt <= 4'h8;
                         state_r <= STATE_WAIT;
                     end else begin
-                        bit_cnt <= bit_cnt - 3'h1;
+                        dout_r <= {dout_r[6:0], sda}; // read data
+                        bit_cnt <= bit_cnt - 4'h1;
                         state_r <= STATE_READ_0;
                     end
                 end
@@ -143,9 +151,11 @@ module iic_core(
                 STATE_WAIT: begin
                     sck   <= 1'b0;
                     sda_r <= 1'b1;
+                    sda_t <= 1'b1;
                     busy  <= 1'b0;
+                    bit_cnt <= 4'h8;
                     sending <= 1'b1;
-                    dout  <= dout_r;
+                    dout  <= dout_r; // update dout
                     
                     if (start) begin
                         if (rw) begin
