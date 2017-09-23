@@ -8,13 +8,13 @@
 module iic_core(
     input  clock, reset_n,
     output reg busy, sending,
-    input  start, stop, rw, // rw = 1 -> read
+    input  start, stop, rw, // rw -> High:read, Low:write
     input  [7:0] din,
     output reg [7:0] dout,
     output reg sck,
     input  sda_i,
     output reg sda_o,
-    output reg sda_t
+    output reg sda_t // High:output Low:input
     );
     
     localparam [4:0] STATE_IDLE    = 5'h0,
