@@ -19,3 +19,9 @@
 |2  |rw       |1:read, 0:write         |
 |1  |sending  |in transaction          |
 |0  |busy     |iic is busy             |
+
+## IICCLKDIV
+
+## IICTX
+
+## IICRX
