@@ -34,6 +34,10 @@ module iic_top #(
     reg [7:0] IICTX     = 8'h0;
     reg [7:0] IICRX     = 8'h0;
     
+    initial begin
+        dout = 8'h0;
+    end
+    
     wire [OPT_MEM_ADDR_BITS:0] loc_addr = addr[ADDR_LSB + OPT_MEM_ADDR_BITS:ADDR_LSB];
     always @(clk) begin
         if (clk == 1'b1) begin

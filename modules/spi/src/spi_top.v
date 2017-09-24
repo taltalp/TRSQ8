@@ -30,6 +30,10 @@ module spi_top #(
     reg [7:0] SPITX     = 8'h00;
     reg [7:0] SPIRX     = 8'h00;
     
+    initial begin
+        dout = 8'h0;
+    end
+    
     wire [OPT_MEM_ADDR_BITS:0] loc_addr = addr[ADDR_LSB + OPT_MEM_ADDR_BITS:ADDR_LSB];
     always @(clk) begin
         if (clk == 1'b1) begin
