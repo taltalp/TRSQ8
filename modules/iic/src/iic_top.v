@@ -25,7 +25,6 @@ module iic_top #(
     wire busy, sending;
     wire start, stop, rw;
     
-    reg [7:0] iic_din;
     wire [7:0] iic_dout;
     
     wire sda_i, sda_o, sda_t;
@@ -63,6 +62,9 @@ module iic_top #(
         end
     end
     
+    assign stop  = IICCON[4];
+    assign start = IICCON[3];
+    assign rw    = IICCON[2];
     
     iic_core iic_core_inst
     (
@@ -73,7 +75,7 @@ module iic_top #(
         .start(start),
         .stop(stop),
         .rw(rw),
-        .din(iic_din),
+        .din(IICTX),
         .dout(iic_dout),
         .sck(sck),
         .sda_i(sda_i),
@@ -91,7 +93,7 @@ module iic_top #(
            .O(sda_i),     // Buffer output
            .IO(sda),     // Buffer inout port (connect directly to top-level port)
            .I(sda_o),     // Buffer input
-           .T(sda_t)       // 3-state enable input, high=input, low=output
+           .T(~sda_t)       // 3-state enable input, high=input, low=output
         );
     `endif
     
