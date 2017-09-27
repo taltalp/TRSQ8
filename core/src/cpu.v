@@ -46,7 +46,6 @@ module cpu (
     reg        irq_pre_i; 
     reg  [7:0] irq_r = 8'b00000000;
 
-    reg  [7:0] status_r;
     wire       jmp_i;
     reg        halt_r;
 
@@ -128,23 +127,22 @@ module cpu (
         end else if ( (irq_i==1'b1) && (irq_pre_i==1'b0) ) begin
             alu_out_stack <= alu_out_r;
             alu_out_r     <= alu_out;
-//            irq_pre_i <= 1'b1;
         end else if (return_i==1'b1) begin
             alu_out_r <= alu_out_stack;
         end else begin
-//            irq_pre_i <= 1'b0;
             alu_out_r    <= alu_out;
             alu_out_cf_r <= alu_out_cf;
         end
 	end
 	assign peri_dout = alu_out_r;
 
-    assign alu_out_zf = alu_out_r==8'h0 ? 1'b1: 1'b0; // ZERO flag
+    // assign alu_out_zf = alu_out_r==8'h0 ? 1'b1: 1'b0; // ZERO flag
 
     // PC
  	always @ (negedge clk_ip) begin
 		if (reset == 1'b1) begin
 			prom_addr <= 13'h0;
+			irq_pre_i <= 1'b0;
 		end else if (halt_i == 1'b1) begin
             prom_addr <= prom_addr;
         end else begin

@@ -1,7 +1,3 @@
-LDL 0 # counter reset
-ST 15 # counter
-LDL 7 # counter mask
-ST 16 # counter mask
 LDL 1 # mask
 ST 10 # save mask
 LDL 122 # txdata (0x7A)
@@ -13,19 +9,22 @@ ST 144 # clear start flag
 LD 144 # load IICCON
 AND 10 # IICCON & 0x01 (busy)
 SKZ
-GOTO 12 # still busy
-GOTO 20 # not busy
+GOTO 8 # still busy
+GOTO 16 # not busy
 NOP
 NOP
 NOP
-LDL 1 # 20
-ADD 15 # counter increment
-ST 15 # counter save
-LD 16 # load counter mask
-AND 15 # counter & mask
+LDL 50 # txdata ()
+ST 146 # IICTX (0x92)
+LDL 8 # 0x0F (start)
+ST 144 # IICCON (0x90)
+LDL 0  # clear start flag
+ST 144 # clear start flag
+LD 144 # load IICCON
+AND 10 # IICCON & 0x01 (busy)
 SKZ
-GOTO 8 # still send
-GOTO 32# finish send
+GOTO 22 # still send
+GOTO 31# finish send
 NOP
 NOP
 NOP
