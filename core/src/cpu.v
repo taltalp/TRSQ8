@@ -180,7 +180,9 @@ module cpu (
 
 	// IRQ ( not tested )
     always @ (posedge clk_ip, posedge irq_ip) begin
-        if (irq_ip == 1'b1) begin
+        if (reset == 1'b1) begin
+            irq_r <= 8'h00;
+        end else if (irq_ip == 1'b1) begin
             irq_r <= 8'h01;
 		end else if (peri_addr == 8'd3) begin
 			irq_r <= alu_out_r;
