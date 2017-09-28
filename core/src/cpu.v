@@ -31,6 +31,7 @@ module cpu (
     wire [4:0] alu_in_sel;
     wire [7:0] alu_out;
     wire       alu_out_cf, alu_out_zf;
+    wire       alu_out_r_zf;
     reg        alu_out_cf_r;
     reg  [7:0] alu_out_r, alu_out_stack;
 
@@ -101,7 +102,7 @@ module cpu (
 
 	// STATUS REGISTER
 	always @ (posedge clk_ip) begin
-		STATUS <= {6'b0, alu_out_zf, alu_out_cf_r};  
+		STATUS <= {6'b0, alu_out_r_zf, alu_out_cf_r};  
 	end
 
 	assign CF_s = STATUS[0];
@@ -117,7 +118,7 @@ module cpu (
 
 
 	// W Register
-	always @ (posedge clk_ip) begin
+	always @ (negedge clk_ip) begin
 		if (reset == 1'b1) begin
 			alu_out_r    <= 8'h0;
 			alu_out_cf_r <= 1'b0;
@@ -136,7 +137,7 @@ module cpu (
 	end
 	assign peri_dout = alu_out_r;
 
-    // assign alu_out_zf = alu_out_r==8'h0 ? 1'b1: 1'b0; // ZERO flag
+    assign alu_out_r_zf = alu_out_r==8'h0 ? 1'b1: 1'b0; // ZERO flag
 
     // PC
  	always @ (negedge clk_ip) begin
