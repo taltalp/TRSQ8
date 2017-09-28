@@ -1,8 +1,8 @@
 LDL 1 # mask
 ST 10 # save mask
-LDL 122 # txdata (0x7A)
+LDL 16 # txdata (0001000 0)
 ST 146 # IICTX (0x92)
-LDL 8 # 0x0F (start)
+LDL 8 # 0x08 (start)
 ST 144 # IICCON (0x90)
 LDL 0  # clear start flag
 ST 144 # clear start flag
@@ -14,7 +14,7 @@ GOTO 16 # not busy
 NOP
 NOP
 NOP
-LDL 50 # txdata ()
+LD 15 # txdata ()
 ST 146 # IICTX (0x92)
 LDL 8 # 0x0F (start)
 ST 144 # IICCON (0x90)
@@ -34,5 +34,8 @@ ST 144 # IICCON (0x90)
 NOP
 LDL 0  # clear stop flag
 ST 144 # clear stop flag
+LDL 1
+ADD 15 
+ST 15 
 GOTO 0 # restart
 HALT

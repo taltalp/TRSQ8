@@ -59,7 +59,7 @@ module TRSQ8(
     
     assign reset_n = ~reset;
     
-    cpu cpu_inst(
+    cpu2 cpu_inst(
         .clk_ip(clk),
         .reset_n_ip(reset_n),
         .STATUS(cpu_status),
