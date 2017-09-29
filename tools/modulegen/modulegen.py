@@ -20,36 +20,69 @@ modules = {
             }
         }
         
+
 def module_inst(module):
-    if (module == 'gpio'):
+    if (module['module'] == 'gpio'):
         hdl_text = [
                 '    gpio #(\n',
                 '        .ADDR_LSB(0),\n',
                 '        .OPT_MEM_ADDR_BITS(1)\n',
                 '    )gpio_',
+                '        .clk(clk),\n',
+                '        .reset_n(reset_n),\n',
+                '        .addr(' + module['name'] + '_addr),\n',
+                '        .din('  + module['name'] + '_din),\n',
+                '        .dout(' + module['name'] + '_dout),\n',
+                '        .wr_en(' + module['name'] + '_wr_en),\n',
+                '        .rd_en(' + module['name'] + '_rd_en),\n',
+                '        .port(' + module['name'] + '_port),\n',
+                '    );\n',
                 '\n'
                 ]
         return hdl_text
 
-    elif (module == 'spi'):
+    elif (module['module'] == 'spi'):
         hdl_text = [
                 '    spi #(\n',
                 '        .ADDR_LSB(0),\n',
                 '        .OPT_MEM_ADDR_BITS(1)\n',
-                '    )spi_',
+                '    )', module['name'] + '_inst(\n',
+                '        .clk(clk),\n',
+                '        .reset_n(reset_n),\n',
+                '        .addr(' + module['name'] + '_addr),\n',
+                '        .din('  + module['name'] + '_din),\n',
+                '        .dout(' + module['name'] + '_dout),\n',
+                '        .wr_en(' + module['name'] + '_wr_en),\n',
+                '        .rd_en(' + module['name'] + '_rd_en),\n',
+                '        .sclk(' + module['name'] + '_sclk),\n',
+                '        .mosi(' + module['name'] + '_mosi),\n',
+                '        .miso(' + module['name'] + '_miso),\n',
+                '        .ss_n(' + module['name'] + '_ss_n),\n',
+                '    );\n',
                 '\n'
                 ]
         return hdl_text
 
-    elif (module == 'iic'):
+    elif (module['module'] == 'iic'):
         hdl_text = [
                 '    iic #(\n',
                 '        .ADDR_LSB(0),\n',
                 '        .OPT_MEM_ADDR_BITS(1)\n',
-                '    )iic_',
+                '    )' + module['name'] + '_inst(\n',
+                '        .clk(clk),\n',
+                '        .reset_n(reset_n),\n',
+                '        .addr(' + module['name'] + '_addr),\n',
+                '        .din('  + module['name'] + '_din),\n',
+                '        .dout(' + module['name'] + '_dout),\n',
+                '        .wr_en(' + module['name'] + '_wr_en),\n',
+                '        .rd_en(' + module['name'] + '_rd_en),\n',
+                '        .sck(' + module['name'] + '_sck),\n',
+                '        .sda(' + module['name'] + '_sda),\n',
+                '    );\n',
                 '\n'
                 ]
         return hdl_text
+    return
 
 
 
@@ -149,6 +182,7 @@ hdl_text_module = [
         ]
 
 for module in modules.values():
+    print(module)
     hdl_text = [
            '\n'
            '    assign ' + module['name'] + '_addr = peri_addr;\n',
@@ -160,7 +194,7 @@ for module in modules.values():
             ]
     hdl_text_intercon += hdl_text
 
-    hdl_text = module_inst(module['module'])
+    hdl_text = module_inst(module)
     hdl_text_module += hdl_text
 
 
