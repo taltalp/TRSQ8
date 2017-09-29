@@ -45,7 +45,7 @@ module cpu (
 
     wire       irq_i, return_i;
     reg        irq_pre_i; 
-    reg  [7:0] irq_r = 8'b00000000;
+    reg  [7:0] irq_r;
 
     wire       jmp_i;
     reg        halt_r;
@@ -178,17 +178,18 @@ module cpu (
 	end
 
 
-	// IRQ ( not tested )
-    always @ (posedge clk_ip, posedge irq_ip) begin
-        if (reset == 1'b1) begin
-            irq_r <= 8'h00;
-        end else if (irq_ip == 1'b1) begin
-            irq_r <= 8'h01;
-		end else if (peri_addr == 8'd3) begin
-			irq_r <= alu_out_r;
-		end
-	end	
+//	// IRQ ( not tested )
+//    always @ (posedge clk_ip, posedge irq_ip) begin
+//        if (reset == 1'b1) begin
+//            irq_r <= 8'h00;
+//        end else if (irq_ip == 1'b1) begin
+//            irq_r <= 8'h01;
+//		end else if (peri_addr == 8'd3) begin
+//			irq_r <= alu_out_r;
+//		end
+//	end	
 
-    assign irq_i = irq_r[1] & irq_r[0];
+//    assign irq_i = irq_r[1] & irq_r[0];
+    assign irq_i = 8'h00;
 
 endmodule
