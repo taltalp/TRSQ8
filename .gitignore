@@ -8,5 +8,6 @@
 
 core/src/prom.*
 tools/prom.*
+tools/modulegen/*.v
 
 *.sh
