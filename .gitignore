@@ -9,5 +9,7 @@
 core/src/prom.*
 tools/prom.*
 tools/modulegen/*.v
+tools/Emulator/*.bin
+tools/Emulator/*.v
 
 *.sh
