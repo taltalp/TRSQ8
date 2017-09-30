@@ -19,9 +19,12 @@ class cpu:
 
 
     def start(self, filepath, max_clock):
+        # open prom bin file
         f = open(filepath, 'r', encoding='utf-8-sig')
         data = f.read()
         lines = data.split('\n')
+
+        f_ram = open('./ram.csv', 'w');
 
         # Load PROM from bin files
         i = 0
@@ -36,15 +39,21 @@ class cpu:
         # Execute until halt 
         # This is the main routine
         while(self.halt == 0):
-            print(str(self.clock_count) + '\t' + str(self.pc), end='')
-            print('\t', end='')
-            # print(self.prom[self.pc])
+            print(str(self.clock_count) + '\t' + str(self.pc) + '\t', end='')
             self.decode(self.prom[self.pc])
+
+            # dump ram to csv file
+            f_ram.writelines(str(self.ram) + '\n')
+
+            # increment program counter
             self.pc += 1
+
+            # run emulation until max clock period
             if self.clock_count >= max_clock :
                 break
             else :
                 self.clock_count += 1
+
 
         if (self.halt == 1):
             print('HALT!')
@@ -60,10 +69,10 @@ class cpu:
 
         print('----------------------------------------------------')
         print(str(self.clock_count) + ' clocks emulation has finished')
-
         return
 
 
+    # TRSQ8 operation decoder
     def decode(self, inst):
         # Immediate Data
         imf = inst & 0xf  # File Register Address
@@ -211,6 +220,7 @@ class cpu:
     # Set Bit
     def __bitSet(self, bit, data):
         return (data | (1 << bit)) & 0xFF
+
 
     # Clear Bit 
     def __bitClear(self, bit, data):
