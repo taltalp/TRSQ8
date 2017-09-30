@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 
+NUM = 100
+
 class cpu:
     """ """
 
@@ -14,6 +16,7 @@ class cpu:
         self.pc = 0             # Program Counter 
         self.w = 0              # Accumulator (Working Register) 
         self.halt = 0           # CPU halt flag 
+        self.clk_count = 0      # clock counter
 
 
     def start(self, filepath):
@@ -28,25 +31,34 @@ class cpu:
                 self.prom[i] = int(line, 2)
                 i += 1
 
-        print('PC\tOperation\tSTATUS')
+        print('CLK\tPC\tOperation\tSTATUS')
 
         # Execute until halt 
         # This is the main routine
         while(self.halt == 0):
-            print(self.pc, end='')
+            print(str(self.clk_count) + '\t' + str(self.pc), end='')
             print('\t', end='')
             # print(self.prom[self.pc])
             self.decode(self.prom[self.pc])
             self.pc += 1
+            if self.clk_count >= NUM :
+                break
+            else :
+                self.clk_count += 1
+
+        if (self.halt == 1):
+            print('HALT!')
 
         # Dump SRAM
-        i = 0
-        print('-----CORE DUMP-----')
-        for data in self.ram:
-            print(i, end='')
-            print('\t', end='')
-            print(data)
-            i += 1
+        # i = 0
+        # print('-----CORE DUMP-----')
+        # for data in self.ram:
+        #     print(i, end='')
+        #     print('\t', end='')
+        #     print(data)
+        #     i += 1
+
+        print(str(self.clk_count) + ' clocks emulation has finished')
 
         return
 
@@ -137,7 +149,6 @@ class cpu:
 
         elif ((inst >> 8) & 0x7f == 0b0000000):
             print("NOP", end='')
-            self.halt = 1
 
         elif ((inst >> 8) & 0x7f == 0b0000001):
             print("HALT", end='')
