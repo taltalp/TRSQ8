@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+import logging
 import numpy as np
 
+logging.basicConfig(level=logging.INFO)
 
 class cpu:
     """ """
@@ -19,12 +21,15 @@ class cpu:
 
 
     def start(self, filepath, max_clock):
+        logging.info('start emulation')
         # open prom bin file
         f = open(filepath, 'r', encoding='utf-8-sig')
         data = f.read()
         lines = data.split('\n')
 
         f_ram = open('./ram.csv', 'w');
+        for i in range(len(self.ram)) :
+            f_ram.writelines(str(i) + ',')
 
         # Load PROM from bin files
         i = 0
@@ -33,17 +38,19 @@ class cpu:
                 self.prom[i] = int(line, 2)
                 i += 1
 
-        print('CLK\tPC\tOperation\tSTATUS')
-        print('----------------------------------------------------')
+        logging.debug('CLK\tPC\tOperation\tSTATUS')
+        logging.debug('----------------------------------------------------')
 
         # Execute until halt 
         # This is the main routine
         while(self.halt == 0):
-            print(str(self.clock_count) + '\t' + str(self.pc) + '\t', end='')
+            logging.debug(str(self.clock_count) + '\t' + str(self.pc) + '\t')
             self.decode(self.prom[self.pc])
 
             # dump ram to csv file
-            f_ram.writelines(str(self.ram) + '\n')
+            for x in self.ram :
+                f_ram.writelines(str(x) + ',')
+            f_ram.writelines('\n')
 
             # increment program counter
             self.pc += 1
@@ -56,19 +63,10 @@ class cpu:
 
 
         if (self.halt == 1):
-            print('HALT!')
+            logging.debug('HALT!')
 
-        # Dump SRAM
-        # i = 0
-        # print('-----CORE DUMP-----')
-        # for data in self.ram:
-        #     print(i, end='')
-        #     print('\t', end='')
-        #     print(data)
-        #     i += 1
-
-        print('----------------------------------------------------')
-        print(str(self.clock_count) + ' clocks emulation has finished')
+        logging.debug('----------------------------------------------------')
+        logging.info(str(self.clock_count) + ' clocks emulation has finished')
         return
 
 
@@ -79,7 +77,7 @@ class cpu:
         imb = (inst >> 8) & 0x7 # Bit Address
 
         if ((inst >> 8) & 0x7f == 0b0100000):
-            print("ADD " + str(hex(self.ram[imf])), end='')
+            logging.debug("ADD " + str(hex(self.ram[imf])))
             # W <- W + F + CF
             self.w = self.w + self.ram[imf] + self.__getStatus(self.CF)
             # Carry Flag
@@ -87,7 +85,7 @@ class cpu:
                 self.__setStatus(self.CF)
                 
         elif ((inst >> 8) & 0x7f == 0b0100001):
-            print("SUB " + str(hex(self.ram[imf])), end='')
+            logging.debug("SUB " + str(hex(self.ram[imf])))
             # W <- W + F + CF
             self.w = self.w - self.ram[imf] + self.__getStatus(self.CF)
             # Carry Flag
@@ -95,84 +93,83 @@ class cpu:
                 self.__setStatus(self.CF)
                 
         elif ((inst >> 8) & 0x7f == 0b0100010):
-            print("MULL", end='')
+            logging.debug("MULL")
             # MULL
 
         elif ((inst >> 8) & 0x7f == 0b0100011):
-            print("MULH", end='')
+            logging.debug("MULH")
             # MULH
 
         elif ((inst >> 8) & 0x7f == 0b0100101):
-            print("UMULL", end='')
+            logging.debug("UMULL")
             # UMULL
 
         elif ((inst >> 8) & 0x7f == 0b0100110):
-            print("UMULH", end='')
+            logging.debug("UMULH")
             # UMULH
 
         elif ((inst >> 8) & 0x7f == 0b0100111):
-            print("AND " + str(hex(self.ram[imf])), end='')
+            logging.debug("AND " + str(hex(self.ram[imf])))
             self.w &= self.ram[imf]
 
         elif ((inst >> 8) & 0x7f == 0b0101000):
-            print("OR " + str(hex(self.ram[imf])), end='')
+            logging.debug("OR " + str(hex(self.ram[imf])))
             self.w |= self.ram[imf]
 
         elif ((inst >> 8) & 0x7f == 0b0101001):
-            print("NOT " + str(hex(self.ram[imf])), end='')
+            logging.debug("NOT " + str(hex(self.ram[imf])))
             self.w = ~self.ram[imf]
         elif ((inst >> 8) & 0x7f == 0b0101011):
-            print("XOR " + str(hex(self.ram[imf])), end='')
+            logging.debug("XOR " + str(hex(self.ram[imf])))
             self.w ^= self.ram[imf]
 
         elif ((inst >> 11) & 0xf == 0b1000):
-            print("BTC", end='')
+            logging.debug("BTC")
             self.ram[imf] = self.__bitClear(imb, self.ram[imf])
 
         elif ((inst >> 11) & 0xf == 0b1001):
-            print("BTS", end='')
+            logging.debug("BTS")
             self.ram[imf] = self.__bitSet(imb, self.ram[imf])
 
 
         elif ((inst >> 8) & 0x7f == 0b0101100):
-            print("ST " + str(hex(self.ram[imf])), end='')
+            logging.debug("ST " + str(hex(self.ram[imf])))
             self.ram[imf] = self.w
         elif ((inst >> 8) & 0x7f == 0b0101101):
-            print("LD " + str(hex(self.ram[imf])), end='')
+            logging.debug("LD " + str(hex(self.ram[imf])))
             self.w = self.ram[imf]
         elif ((inst >> 8) & 0x7f == 0b0101110):
-            print("LDL " + str(hex(self.ram[imf])), end='')
+            logging.debug("LDL " + str(hex(self.ram[imf])))
             self.w = imf
 
         elif ((inst >> 8) & 0x7f == 0b0000101):
-            print("SKZ", end='')
+            logging.debug("SKZ")
             if (self.__getStatus(self.ZF)):
                 self.pc += 1 
 
         elif ((inst >> 8) & 0x7f == 0b0000110):
-            print("SKC", end='')
+            logging.debug("SKC")
             if (self.__getStatus(self.CF)):
                 self.pc += 1
 
         elif ((inst >> 8) & 0x7f == 0b0000000):
-            print("NOP", end='')
+            logging.debug("NOP")
 
         elif ((inst >> 8) & 0x7f == 0b0000001):
-            print("HALT", end='')
+            logging.debug("HALT")
             self.halt = 1
 
         elif ((inst >> 13) & 0x3 == 0b11):
-            print("GOTO", end='')
+            logging.debug("GOTO")
             self.pc = (inst & 0x3ff) 
         else:
-            print("not implemented", end='')
+            logging.debug("not implemented")
 
         # Zero Flag
         if(self.__checkZero(self.w)):
             self.__setStatus(self.ZF)
 
-        print('\t\t', end='')
-        print(bin(self.ram[0]))
+        logging.debug(bin(self.ram[0]))
 
         return
 
@@ -182,7 +179,7 @@ class cpu:
         if (num < 8):
             self.ram[0] |= (1 << num)
         else:
-            print("error")
+            logging.error("error")
             self.halt = 1
         return
 
@@ -195,7 +192,7 @@ class cpu:
             status &= 1 
             return status
         else:
-            print("error")
+            logging.error("error")
             self.halt = 1
             return 0
 
