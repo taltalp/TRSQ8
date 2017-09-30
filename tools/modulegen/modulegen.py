@@ -84,24 +84,46 @@ def module_inst(module):
         return hdl_text
     return
 
-
+def module_port(module):
+    if (module['module'] == 'gpio'):
+        hdl_text = [
+                ',\n\n',
+                '    // ' + module['name'] + '_inst\n',
+                '    inout [7:0] ' + module['name'] + '_port'
+                ]
+        return hdl_text
+    elif (module['module'] == 'spi'):
+        hdl_text = [
+                ',\n\n',
+                '    // ' + module['name'] + '_inst\n',
+                '    output ' + module['name'] + '_sclk,\n',
+                '    output ' + module['name'] + '_mosi,\n',
+                '    input ' + module['name'] + '_miso,\n',
+                '    output [0:0] ' + module['name'] + '_cs'
+                ]
+        return hdl_text
+    elif (module['module'] == 'iic'):
+        hdl_text = [
+                ',\n\n',
+                '    // ' + module['name'] + '_inst\n',
+                '    output ' + module['name'] + '_sck,\n',
+                '    inout ' + module['name'] + '_sda',
+                ]
+        return hdl_text
+    return
 
 hdl_text_0 = [
         '`timescale 1ns / 1ps\n',
         'module TRSQ8(\n',
         '    input clk,\n',
-        '    input reset,\n',
-        '\n',
-        '    // user module\n',
+        '    input reset',
         ]
 
 hdl_text_port = [
-        '    output iic_0_sck,\n',
-        '    inout  iic_0_sda,\n'
         ]
 
 hdl_text_1 = [
-        '    );\n',
+        ');\n',
         '\n',
         '    wire reset_n;\n',
         '    wire [7:0] cpu_status;\n',
@@ -196,6 +218,9 @@ for module in modules.values():
 
     hdl_text = module_inst(module)
     hdl_text_module += hdl_text
+
+    hdl_text = module_port(module)
+    hdl_text_port += hdl_text
 
 
 with open('./TRSQ8.v', 'w', encoding='utf-8-sig') as text:
