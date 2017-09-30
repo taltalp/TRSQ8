@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 
-NUM = 100
 
 class cpu:
     """ """
@@ -16,10 +15,10 @@ class cpu:
         self.pc = 0             # Program Counter 
         self.w = 0              # Accumulator (Working Register) 
         self.halt = 0           # CPU halt flag 
-        self.clk_count = 0      # clock counter
+        self.clock_count = 0    # clock counter
 
 
-    def start(self, filepath):
+    def start(self, filepath, max_clock):
         f = open(filepath, 'r', encoding='utf-8-sig')
         data = f.read()
         lines = data.split('\n')
@@ -32,19 +31,20 @@ class cpu:
                 i += 1
 
         print('CLK\tPC\tOperation\tSTATUS')
+        print('----------------------------------------------------')
 
         # Execute until halt 
         # This is the main routine
         while(self.halt == 0):
-            print(str(self.clk_count) + '\t' + str(self.pc), end='')
+            print(str(self.clock_count) + '\t' + str(self.pc), end='')
             print('\t', end='')
             # print(self.prom[self.pc])
             self.decode(self.prom[self.pc])
             self.pc += 1
-            if self.clk_count >= NUM :
+            if self.clock_count >= max_clock :
                 break
             else :
-                self.clk_count += 1
+                self.clock_count += 1
 
         if (self.halt == 1):
             print('HALT!')
@@ -58,7 +58,8 @@ class cpu:
         #     print(data)
         #     i += 1
 
-        print(str(self.clk_count) + ' clocks emulation has finished')
+        print('----------------------------------------------------')
+        print(str(self.clock_count) + ' clocks emulation has finished')
 
         return
 
@@ -67,9 +68,6 @@ class cpu:
         # Immediate Data
         imf = inst & 0xf  # File Register Address
         imb = (inst >> 8) & 0x7 # Bit Address
-
-        # self.ram[1] = self.pc & 0xFF        # PCRL
-        # self.ram[2] = (self.pc >> 8) & 0xFF # PCRH
 
         if ((inst >> 8) & 0x7f == 0b0100000):
             print("ADD " + str(hex(self.ram[imf])), end='')
@@ -179,6 +177,7 @@ class cpu:
             self.halt = 1
         return
 
+
     # Get each bits of STATUS 
     def __getStatus(self, num):
         status = self.ram[0]
@@ -209,10 +208,11 @@ class cpu:
             return 0
 
     
+    # Set Bit
     def __bitSet(self, bit, data):
         return (data | (1 << bit)) & 0xFF
 
-    
+    # Clear Bit 
     def __bitClear(self, bit, data):
         return (data & (0xFF - (1 << bit))) & 0xFF
         
@@ -220,4 +220,4 @@ class cpu:
 if __name__ == '__main__':
     cpu = cpu()
     f = "prom.bin"
-    cpu.start(f)
+    cpu.start(f, 100)
