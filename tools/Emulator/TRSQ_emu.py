@@ -203,7 +203,7 @@ class cpu:
 
     
     def __bitClear(self, bit, data):
-        return
+        return (data & (0xFF - (1 << bit))) & 0xFF
         
 
 if __name__ == '__main__':
