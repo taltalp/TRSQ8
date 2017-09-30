@@ -30,6 +30,7 @@ class cpu:
         f_ram = open('./ram.csv', 'w');
         for i in range(len(self.ram)) :
             f_ram.writelines(str(i) + ',')
+        f_ram.writelines('\n')
 
         # Load PROM from bin files
         i = 0
@@ -44,7 +45,7 @@ class cpu:
         # Execute until halt 
         # This is the main routine
         while(self.halt == 0):
-            logging.debug(str(self.clock_count) + '\t' + str(self.pc) + '\t')
+            logging.debug('clock = ' + str(self.clock_count) + '\t' + 'pc = ' + str(self.pc) + '\t')
             self.decode(self.prom[self.pc])
 
             # dump ram to csv file
@@ -227,4 +228,4 @@ class cpu:
 if __name__ == '__main__':
     cpu = cpu()
     f = "prom.bin"
-    cpu.start(f, 100)
+    cpu.start(f, 10000)
