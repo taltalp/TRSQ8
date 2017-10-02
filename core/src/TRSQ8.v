@@ -59,7 +59,7 @@ module TRSQ8(
     
     assign reset_n = ~reset;
     
-    cpu2 cpu_inst(
+    cpu cpu_inst(
         .clk_ip(clk),
         .reset_n_ip(reset_n),
         .STATUS(cpu_status),
@@ -105,11 +105,10 @@ module TRSQ8(
     assign ram_wr_en = (peri_addr >= 8'h00 & peri_addr <= 8'h7F) ? peri_wr_en : 1'b0;
     assign ram_rd_en = (peri_addr >= 8'h00 & peri_addr <= 8'h7F) ? peri_rd_en : 1'b0;
     
-    assign peri_din = (peri_addr >= 8'h00 & peri_addr <= 8'h7F) ? ram_din :
-                      (peri_addr >= 8'h80 & peri_addr <= 8'h83) ? spi_0_din :
-                      (peri_addr >= 8'h84 & peri_addr <= 8'h87) ? gpio_0_din :
-                      (peri_addr >= 8'h90 & peri_addr <= 8'h93) ? iic_0_din :
-                      8'h00;
+    assign peri_din = (peri_addr >= 8'h00 & peri_addr <= 8'h7F) ? ram_din : 8'hZZ;
+    assign peri_din = (peri_addr >= 8'h80 & peri_addr <= 8'h83) ? spi_0_din : 8'hZZ;
+    assign peri_din = (peri_addr >= 8'h84 & peri_addr <= 8'h87) ? gpio_0_din : 8'hZZ;
+    assign peri_din = (peri_addr >= 8'h90 & peri_addr <= 8'h93) ? iic_0_din : 8'hZZ;
     
     // spi_0_inst
     assign spi_0_addr = peri_addr;
