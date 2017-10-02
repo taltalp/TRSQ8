@@ -106,20 +106,10 @@ module TRSQ8(
     assign ram_rd_en = (peri_addr >= 8'h00 & peri_addr <= 8'h7F) ? peri_rd_en : 1'b0;
     assign peri_din = (peri_addr >= 8'h00 & peri_addr <= 8'h7F) ? ram_din : 8'hZZ;
     
-    
-    assign peri_din = (peri_addr >= 8'h84 & peri_addr <= 8'h87) ? gpio_0_din : 8'hZZ;
-    
-    // gpio_0_inst
-    assign gpio_0_addr = peri_addr;
-    assign gpio_0_dout = peri_dout;
-    assign gpio_0_wr_en = (peri_addr >= 8'h84 & peri_addr <= 8'h87) ? peri_wr_en : 1'b0;
-    assign gpio_0_rd_en = (peri_addr >= 8'h84 & peri_addr <= 8'h87) ? peri_rd_en : 1'b0;
-    
-    
     // gpio_0_inst
     gpio #(
-        .ADDR_LSB(0),
-        .OPT_MEM_ADDR_BITS(1)
+        .BASE_ADDR(8'h84),
+        .LAST_ADDR(8'h87)
     )gpio_0_inst(
         .clk(clk), 
         .reset_n(reset_n),
