@@ -115,11 +115,11 @@ module TRSQ8(
         .reset_n(reset_n),
         
         // CPU Interface
-        .addr(gpio_0_addr),
-        .din(gpio_0_dout),
-        .dout(gpio_0_din),
-        .wr_en(gpio_0_wr_en),
-        .rd_en(gpio_0_rd_en),
+        .addr(peri_addr),
+        .din(peri_din),
+        .dout(peri_dout),
+        .wr_en(peri_wr_en),
+        .rd_en(peri_rd_en),
         
         // GPIO Interface
         .port(gpio_0_port)
