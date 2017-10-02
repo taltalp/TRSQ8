@@ -7,19 +7,22 @@
 `define vivado
 
 module gpio #(
-    parameter ADDR_LSB = 0,
-    parameter OPT_MEM_ADDR_BITS = 1
+    parameter BASE_ADDR = 8'h80,
+    parameter LAST_ADDR = 8'h83
     )(
     input clk, reset_n,
     
     // CPU Interface
-    input [7:0] addr, din,
-    output reg [7:0] dout,
+    input [7:0] addr, dout,
+    output[7:0] din,
     input wr_en, rd_en,
     
     // GPIO Interface
     inout [7:0] port
     );
+    
+    localparam integer ADDR_LSB = 0;
+    localparam integer OPT_MEM_ADDR_BITS = 1;
     
     reg [7:0] TRIS = 8'h00;
     reg [7:0] OGPIO = 8'h00; 
@@ -28,12 +31,26 @@ module gpio #(
     
     wire [7:0] ibuf;
     
+    reg [7:0] gpio_dout;
+    wire [7:0] gpio_addr, gpio_din;
+    wire gpio_wr_en, gpio_rd_en;
+    
+    assign din = (addr >= BASE_ADDR & addr <= LAST_ADDR) ? gpio_dout : 8'hZZ;
+    assign gpio_addr = addr;
+    assign gpio_din = dout;
+    assign gpio_wr_en = (addr >= BASE_ADDR & addr <= LAST_ADDR) ? wr_en : 1'b0;
+    assign gpio_rd_en = (addr >= BASE_ADDR & addr <= LAST_ADDR) ? rd_en : 1'b0;
+    
+    initial begin
+        gpio_dout = 8'h0;
+    end
+    
     wire [OPT_MEM_ADDR_BITS:0] loc_addr = addr[ADDR_LSB + OPT_MEM_ADDR_BITS:ADDR_LSB];
     always @(posedge clk) begin
-        if (wr_en == 1'b1) begin
+        if (gpio_wr_en == 1'b1) begin
             case (loc_addr)
-                2'b00 : OGPIO <= din;
-                2'b01 : TRIS <= din;
+                2'b00 : OGPIO <= gpio_din;
+                2'b01 : TRIS <= gpio_din;
                 // 2'b10 : IGPIO <= din;
                 // 2'b11 : DUMMY <= din;
                 default : begin : wr_def
@@ -41,13 +58,13 @@ module gpio #(
                           OGPIO <= OGPIO;
                           end
             endcase
-        end else if (rd_en == 1'b1) begin
+        end else if (gpio_rd_en == 1'b1) begin
             case (loc_addr)
-                2'b00 : dout <= OGPIO;
-                2'b01 : dout <= TRIS;
-                2'b10 : dout <= IGPIO;
+                2'b00 : gpio_dout <= OGPIO;
+                2'b01 : gpio_dout <= TRIS;
+                2'b10 : gpio_dout <= IGPIO;
                 // 2'b11 : dout <= DUMMY;
-                default : dout <= 8'h00;
+                default : gpio_dout <= 8'h00;
             endcase
         end
         

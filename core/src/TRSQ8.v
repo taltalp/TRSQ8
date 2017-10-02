@@ -104,27 +104,16 @@ module TRSQ8(
     assign ram_dout = peri_dout;
     assign ram_wr_en = (peri_addr >= 8'h00 & peri_addr <= 8'h7F) ? peri_wr_en : 1'b0;
     assign ram_rd_en = (peri_addr >= 8'h00 & peri_addr <= 8'h7F) ? peri_rd_en : 1'b0;
-    
     assign peri_din = (peri_addr >= 8'h00 & peri_addr <= 8'h7F) ? ram_din : 8'hZZ;
-    assign peri_din = (peri_addr >= 8'h80 & peri_addr <= 8'h83) ? spi_0_din : 8'hZZ;
-    assign peri_din = (peri_addr >= 8'h84 & peri_addr <= 8'h87) ? gpio_0_din : 8'hZZ;
-    assign peri_din = (peri_addr >= 8'h90 & peri_addr <= 8'h93) ? iic_0_din : 8'hZZ;
     
-    // spi_0_inst
-    assign spi_0_addr = peri_addr;
-    assign spi_0_dout = peri_dout;
-    assign spi_0_wr_en = (peri_addr >= 8'h80 & peri_addr <= 8'h83) ? peri_wr_en : 1'b0;
-    assign spi_0_rd_en = (peri_addr >= 8'h80 & peri_addr <= 8'h83) ? peri_rd_en : 1'b0;
+    
+    assign peri_din = (peri_addr >= 8'h84 & peri_addr <= 8'h87) ? gpio_0_din : 8'hZZ;
+    
     // gpio_0_inst
     assign gpio_0_addr = peri_addr;
     assign gpio_0_dout = peri_dout;
     assign gpio_0_wr_en = (peri_addr >= 8'h84 & peri_addr <= 8'h87) ? peri_wr_en : 1'b0;
     assign gpio_0_rd_en = (peri_addr >= 8'h84 & peri_addr <= 8'h87) ? peri_rd_en : 1'b0;
-    // iic_0_inst
-    assign iic_0_addr = peri_addr;
-    assign iic_0_dout = peri_dout;
-    assign iic_0_wr_en = (peri_addr >= 8'h90 & peri_addr <= 8'h93) ? peri_wr_en : 1'b0;
-    assign iic_0_rd_en = (peri_addr >= 8'h90 & peri_addr <= 8'h93) ? peri_rd_en : 1'b0;
     
     
     // gpio_0_inst
@@ -148,18 +137,18 @@ module TRSQ8(
     
     // spi_0_inst
     spi_top #(
-        .ADDR_LSB(0),
-        .OPT_MEM_ADDR_BITS(1)
+        .BASE_ADDR(8'h80),
+        .LAST_ADDR(8'h83)
     )spi_0_inst(
         .clk(clk),
         .reset_n(reset_n),
         
         // CPU Interface
-        .addr(spi_0_addr),
-        .din(spi_0_dout),
-        .dout(spi_0_din),
-        .wr_en(spi_0_wr_en),
-        .rd_en(spi_0_rd_en),
+        .addr(peri_addr),
+        .din(peri_din),
+        .dout(peri_dout),
+        .wr_en(peri_wr_en),
+        .rd_en(peri_rd_en),
         
         // SPI Interface
         .sclk(spi_0_sclk),
@@ -170,18 +159,18 @@ module TRSQ8(
     
     // iic_0_inst
     iic_top #(
-        .ADDR_LSB(0),
-        .OPT_MEM_ADDR_BITS(1)
+        .BASE_ADDR(8'h90),
+        .LAST_ADDR(8'h93)
     )iic_0_inst(
         .clk(clk),
         .reset_n(reset_n),
         
         // CPU Interface
-        .addr(iic_0_addr),
-        .din(iic_0_dout),
-        .dout(iic_0_din),
-        .wr_en(iic_0_wr_en),
-        .rd_en(iic_0_rd_en),
+        .addr(peri_addr),
+        .din(peri_din),
+        .dout(peri_dout),
+        .wr_en(peri_wr_en),
+        .rd_en(peri_rd_en),
         
         // IIC Interface
         .sck(iic_0_sck),

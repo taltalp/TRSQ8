@@ -7,14 +7,14 @@
 
 
 module spi_top #(
-    parameter ADDR_LSB = 0,
-    parameter OPT_MEM_ADDR_BITS = 1
+        parameter BASE_ADDR = 8'h80,
+        parameter LAST_ADDR = 8'h83
     )(
     input clk, reset_n,
     
     // CPU Interface
-    input [7:0] addr, din,
-    output reg [7:0] dout,
+    input [7:0] addr, dout,
+    output [7:0] din,
     input wr_en, rd_en,
     
     // SPI Interface
@@ -23,6 +23,9 @@ module spi_top #(
     output [0:0] ss_n
     );
     
+    localparam integer ADDR_LSB = 0;
+    localparam integer OPT_MEM_ADDR_BITS = 1;
+    
     wire spi_busy, spi_rx;
     reg  spi_enable, spi_busy_tmp;
     reg [7:0] SPICON    = 8'h00; 
@@ -30,19 +33,29 @@ module spi_top #(
     reg [7:0] SPITX     = 8'h00;
     reg [7:0] SPIRX     = 8'h00;
     
+    reg [7:0] spi_dout;
+    wire [7:0] spi_addr, spi_din;
+    wire spi_wr_en, spi_rd_en;
+    
+    assign din = (addr >= 8'h80 & addr <= 8'h83) ? spi_dout : 8'hZZ;
+    assign spi_addr = addr;
+    assign spi_din = dout;
+    assign spi_wr_en = (addr >= 8'h80 & addr <= 8'h83) ? wr_en : 1'b0;
+    assign spi_rd_en = (addr >= 8'h80 & addr <= 8'h83) ? rd_en : 1'b0;
+    
     initial begin
-        dout = 8'h0;
+        spi_dout = 8'h0;
     end
     
-    wire [OPT_MEM_ADDR_BITS:0] loc_addr = addr[ADDR_LSB + OPT_MEM_ADDR_BITS:ADDR_LSB];
+    wire [OPT_MEM_ADDR_BITS:0] loc_addr = spi_addr[ADDR_LSB + OPT_MEM_ADDR_BITS:ADDR_LSB];
     always @(clk) begin
         if (clk == 1'b1) begin
-            if (wr_en) begin
+            if (spi_wr_en) begin
                 case (loc_addr)
-                    2'b00 : SPICON <= din;
-                    2'b01 : SPICLKDIV <= din;
-                    2'b10 : SPITX <= din;
-                    2'b11 : SPIRX <= din;
+                    2'b00 : SPICON <= spi_din;
+                    2'b01 : SPICLKDIV <= spi_din;
+                    2'b10 : SPITX <= spi_din;
+                    2'b11 : SPIRX <= spi_din;
                     default : begin : wr_def
                               SPICON <= SPICON;
                               SPICLKDIV <= SPICLKDIV;
@@ -50,13 +63,13 @@ module spi_top #(
                               SPIRX <= SPIRX;
                               end
                 endcase
-            end else if (rd_en) begin
+            end else if (spi_rd_en) begin
                 case (loc_addr)
-                    2'b00 : dout <= SPICON;
-                    2'b01 : dout <= SPICLKDIV;
-                    2'b10 : dout <= SPITX;
-                    2'b11 : dout <= SPIRX;
-                    default : dout <= 8'h00;
+                    2'b00 : spi_dout <= SPICON;
+                    2'b01 : spi_dout <= SPICLKDIV;
+                    2'b10 : spi_dout <= SPITX;
+                    2'b11 : spi_dout <= SPIRX;
+                    default : spi_dout <= 8'h00;
                 endcase
             end
         end else if (clk == 1'b0) begin
