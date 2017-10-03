@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*- 
+
+# 使用するモジュールの定義
 modules = { 
         'spi_0' : {
             'name' : 'spi_0',
@@ -20,21 +22,22 @@ modules = {
             }
         }
         
-
+# 各モジュールのインスタンスを返す
 def module_inst(module):
     if (module['module'] == 'gpio'):
         hdl_text = [
+                '    // ' + module['name'] + '_inst\n',
                 '    gpio #(\n',
-                '        .ADDR_LSB(0),\n',
-                '        .OPT_MEM_ADDR_BITS(1)\n',
-                '    )gpio_',
+                '        .BASE_ADDR(8\'h' + module['baseaddr'] + '),\n',
+                '        .LAST_ADDR(8\'h' + module['lastaddr'] + ')\n',
+                '    )' + module['name'] + '_inst',
                 '        .clk(clk),\n',
                 '        .reset_n(reset_n),\n',
-                '        .addr(' + module['name'] + '_addr),\n',
-                '        .din('  + module['name'] + '_din),\n',
-                '        .dout(' + module['name'] + '_dout),\n',
-                '        .wr_en(' + module['name'] + '_wr_en),\n',
-                '        .rd_en(' + module['name'] + '_rd_en),\n',
+                '        .addr(peri_addr),\n',
+                '        .din(peri_din),\n',
+                '        .dout(peri_dout),\n',
+                '        .wr_en(peri_wr_en),\n',
+                '        .rd_en(peri_rd_en),\n',
                 '        .port(' + module['name'] + '_port),\n',
                 '    );\n',
                 '\n'
@@ -43,17 +46,18 @@ def module_inst(module):
 
     elif (module['module'] == 'spi'):
         hdl_text = [
+                '    // ' + module['name'] + '_inst\n',
                 '    spi #(\n',
-                '        .ADDR_LSB(0),\n',
-                '        .OPT_MEM_ADDR_BITS(1)\n',
+                '        .BASE_ADDR(8\'h' + module['baseaddr'] + '),\n',
+                '        .LAST_ADDR(8\'h' + module['lastaddr'] + ')\n',
                 '    )', module['name'] + '_inst(\n',
                 '        .clk(clk),\n',
                 '        .reset_n(reset_n),\n',
-                '        .addr(' + module['name'] + '_addr),\n',
-                '        .din('  + module['name'] + '_din),\n',
-                '        .dout(' + module['name'] + '_dout),\n',
-                '        .wr_en(' + module['name'] + '_wr_en),\n',
-                '        .rd_en(' + module['name'] + '_rd_en),\n',
+                '        .addr(peri_addr),\n',
+                '        .din(peri_din),\n',
+                '        .dout(peri_dout),\n',
+                '        .wr_en(peri_wr_en),\n',
+                '        .rd_en(peri_rd_en),\n',
                 '        .sclk(' + module['name'] + '_sclk),\n',
                 '        .mosi(' + module['name'] + '_mosi),\n',
                 '        .miso(' + module['name'] + '_miso),\n',
@@ -65,17 +69,18 @@ def module_inst(module):
 
     elif (module['module'] == 'iic'):
         hdl_text = [
+                '    // ' + module['name'] + '_inst\n',
                 '    iic #(\n',
-                '        .ADDR_LSB(0),\n',
-                '        .OPT_MEM_ADDR_BITS(1)\n',
+                '        .BASE_ADDR(8\'h' + module['baseaddr'] + '),\n',
+                '        .LAST_ADDR(8\'h' + module['lastaddr'] + ')\n',
                 '    )' + module['name'] + '_inst(\n',
                 '        .clk(clk),\n',
                 '        .reset_n(reset_n),\n',
-                '        .addr(' + module['name'] + '_addr),\n',
-                '        .din('  + module['name'] + '_din),\n',
-                '        .dout(' + module['name'] + '_dout),\n',
-                '        .wr_en(' + module['name'] + '_wr_en),\n',
-                '        .rd_en(' + module['name'] + '_rd_en),\n',
+                '        .addr(peri_addr),\n',
+                '        .din(peri_din),\n',
+                '        .dout(peri_dout),\n',
+                '        .wr_en(peri_wr_en),\n',
+                '        .rd_en(peri_rd_en),\n',
                 '        .sck(' + module['name'] + '_sck),\n',
                 '        .sda(' + module['name'] + '_sda),\n',
                 '    );\n',
@@ -84,6 +89,7 @@ def module_inst(module):
         return hdl_text
     return
 
+# 各モジュールのポートを返す
 def module_port(module):
     if (module['module'] == 'gpio'):
         hdl_text = [
@@ -112,6 +118,20 @@ def module_port(module):
         return hdl_text
     return
 
+# 各モジュールのワイヤを返す
+def module_wire(module):
+    hdl_text = [
+            '    // ' + module['name'] + '_inst\n',
+            '    wire [7:0] ' + module['name'] + '_addr;\n',
+            '    wire [7:0] ' + module['name'] + '_din;\n',
+            '    wire [7:0] ' + module['name'] + '_dout;\n',
+            '    wire ' + module['name'] + '_wr_en;\n',
+            '    wire ' + module['name'] + '_rd_en;\n'
+            ]
+    return hdl_text
+
+
+# モジュールの定義とポートの定義
 hdl_text_0 = [
         '`timescale 1ns / 1ps\n',
         'module TRSQ8(\n',
@@ -119,9 +139,11 @@ hdl_text_0 = [
         '    input reset',
         ]
 
+# 各モジュールのポートの定義
 hdl_text_port = [
         ]
 
+# 内部のワイヤ定義部分
 hdl_text_1 = [
         ');\n',
         '\n',
@@ -129,27 +151,28 @@ hdl_text_1 = [
         '    wire [7:0] cpu_status;\n',
         '    wire [12:0] prom_addr;\n',
         '    wire [14:0] prom_data;\n',
+        '\n',
+        '    // peripheral bus\n',
         '    wire [7:0]  peri_addr;\n',
         '    wire [7:0]  peri_din;\n',
         '    wire [7:0]  peri_dout;\n',
         '    wire        peri_wr_en;\n',
         '    wire        peri_rd_en;\n',
-        '    reg [7:0] ram_i [0:255];\n',
+        '\n',
+        '    // ram\n',
+        '    reg  [7:0] ram_i [0:255];\n',
         '    wire [7:0] ram_addr;\n',
         '    wire [7:0] ram_din;\n',
         '    wire [7:0] ram_dout;\n',
         '\n',
-        '    // user module\n',
+        '    // ===== user module =====\n',
         ]
 
+# 各モジュールのワイヤ定義
 hdl_text_wire = [
-        '    wire [7:0]  iic_0_addr;\n', 
-        '    wire [7:0]  iic_0_din;\n', 
-        '    wire [7:0]  iic_0_dout;\n', 
-        '    wire iic_0_wr_en;\n', 
-        '    wire iic_0_rd_en;\n' 
         ]
 
+# 各種インスタンス呼び出し部
 hdl_text_2 = [
         '\n',
         '    assign reset_n = ~reset;\n',
@@ -190,45 +213,39 @@ hdl_text_2 = [
         '    end\n',
         '    assign ram_din = ram_i[ram_addr];\n',
         '\n',
-        '    // Interconnect\n',
+        '    // ===== Interconnect =====\n',
         '    assign ram_addr = peri_addr;\n',
         '    assign ram_dout = peri_dout;\n',
         '    assign ram_wr_en = (peri_addr >= 8\'h00 & peri_addr <= 8\'h7F) ? peri_wr_en : 1\'b0;\n',
-        '    assign ram_rd_en = (peri_addr >= 8\'h00 & peri_addr <= 8\'h7F) ? peri_rd_en : 1\'b0;\n'
+        '    assign ram_rd_en = (peri_addr >= 8\'h00 & peri_addr <= 8\'h7F) ? peri_rd_en : 1\'b0;\n',
+        '    assign peri_din = (peri_addr >= 8\'h00 & peri_addr <= 8\'h7F) ? ram_din : 8\'hZZ;\n',
+        '\n',
+        '     // ==== user module instantiation ====\n'
         ]
 
-hdl_text_intercon = [
-        ]
-
+# ユーザ定義のモジュールインスタンス呼び出し部
 hdl_text_module = [
         ]
 
 for module in modules.values():
     print(module)
-    hdl_text = [
-           '\n'
-           '    assign ' + module['name'] + '_addr = peri_addr;\n',
-           '    assign ' + module['name'] + '_dout = peri_dout;\n',
-           '    assign ' + module['name'] + '_wr_en = (peri_addr >= 8\'h' + module['baseaddr'] + 
-           ' & peri_addr <= 8\'h' + module['lastaddr'] +  ') ? peri_wr_en : 1\'b0\n',
-           '    assign ' + module['name'] + '_rd_en = (peri_addr >= 8\'h' + module['baseaddr'] + 
-           ' & peri_addr <= 8\'h' + module['lastaddr'] +  ') ? peri_rd_en : 1\'b0\n',
-            ]
-    hdl_text_intercon += hdl_text
-
+    # インスタンスの生成
     hdl_text = module_inst(module)
     hdl_text_module += hdl_text
-
+    # ポートの生成
     hdl_text = module_port(module)
     hdl_text_port += hdl_text
+    # ワイヤの生成
+    hdl_text = module_wire(module)
+    hdl_text_wire += hdl_text
 
 
+# HDLへの書き出し
 with open('./TRSQ8.v', 'w', encoding='utf-8-sig') as text:
     text.writelines(hdl_text_0)
     text.writelines(hdl_text_port)
     text.writelines(hdl_text_1)
     text.writelines(hdl_text_wire)
     text.writelines(hdl_text_2)
-    text.writelines(hdl_text_intercon)
     text.writelines(hdl_text_module)
     text.writelines('endmodule')
