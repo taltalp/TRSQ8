@@ -33,7 +33,7 @@ module TRSQ8(
     wire [7:0] peri_dout;
     wire peri_wr_en, peri_rd_en;
     
-    reg  [7:0] ram_i [0:255];
+//    reg  [7:0] ram_i [0:255];
     
     wire [7:0] ram_addr;
     wire [7:0] ram_din;
@@ -80,31 +80,16 @@ module TRSQ8(
         .DATA_op(prom_data)
     );
     
-    // RAM
-    always @ (posedge clk) begin
-        if (reset == 1'b1) begin : init_mem
-            integer i;
-            for (i=0;i<256;i=i+1) begin
-                ram_i[i] <= 8'h00;
-            end
-        end else begin
-            ram_i[0] <= cpu_status;
-                
-            if (ram_wr_en == 1'b1) begin
-                if (ram_addr != 8'h00) begin
-                    ram_i[ram_addr] <= ram_dout;
-                end
-            end
-        end    
-    end
-    assign ram_din = ram_i[ram_addr];
-    
-    // ===== Interconnect =====
-    assign ram_addr = peri_addr;
-    assign ram_dout = peri_dout;
-    assign ram_wr_en = (peri_addr >= 8'h00 & peri_addr <= 8'h7F) ? peri_wr_en : 1'b0;
-    assign ram_rd_en = (peri_addr >= 8'h00 & peri_addr <= 8'h7F) ? peri_rd_en : 1'b0;
-    assign peri_din = (peri_addr >= 8'h00 & peri_addr <= 8'h7F) ? ram_din : 8'hZZ;
+    ram ram_inst(
+        .clk(clk),
+        .reset_n(reset_n),
+        .addr(peri_addr),
+        .dout(peri_dout),
+        .din(peri_din),
+        .wr_en(peri_wr_en),
+        .rd_en(peri_rd_en),
+        .cpu_status(cpu_status)
+        );
     
     // gpio_0_inst
     gpio #(
