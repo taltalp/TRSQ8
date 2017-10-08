@@ -1,0 +1,6 @@
+LDL 255 # all input 
+ST 133 # TRIS Addr
+LD 134 # IGPIO Addr
+ST 10
+GOTO 2
+HALT
