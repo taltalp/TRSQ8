@@ -1,18 +1,28 @@
+GOTO 10
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
 LDL 255 # set gpio all input
 ST 133 # TRIS
 LD 134 # IGPIO Load
 ST 10 # save GPIO data
 LDL 0 # set spi module
-ST 0x80 # 
+ST 128 # 
 LD 10 # load GPIO data
-ST 0x82 # set spi tx data
-LDL 0x10 # set spi enable
-ST 0x80
+ST 130 # set spi tx data
+LDL 16 # set spi enable
+ST 128 
 LDL 1 # busy check mask
-AND 0x80 # check busy
+AND 128 # check busy
 SKZ
-GOTO 10# still busy
-GOTO 20# send finished
+GOTO 20# still busy
+GOTO 30# send finished
 NOP
 NOP
 NOP
@@ -29,8 +39,8 @@ ST 144
 LD 144 # load IICCON
 AND 15 # IICCON & 0x01 (busy)
 SKZ
-GOTO 28 # still busy
-GOTO 40 # send finished
+GOTO 38 # still busy
+GOTO 50 # send finished
 NOP
 NOP
 NOP
@@ -46,8 +56,8 @@ LDL 0 # clear start flag
 LD 144 # load IICCON
 AND 15
 SKZ
-GOTO 45 # still busy
-GOTO 60 # send finished
+GOTO 55 # still busy
+GOTO 70 # send finished
 NOP
 NOP
 NOP
