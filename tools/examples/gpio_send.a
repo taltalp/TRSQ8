@@ -25,53 +25,5 @@ LDL 1 # busy check mask
 AND 128 # check busy
 SKZ
 GOTO 23# still busy
-GOTO 30# send finished
-NOP
-NOP
-LDL 1 # mask
-ST 15 # save mask
-LDL 16 # IIC TXDATA (0001000 0)
-ST 146 # IICTX
-LDL 8 # IIC start
-ST 144 # IICCON
-LDL 0 # clear start flag
-ST 144
-LD 144 # load IICCON
-AND 15 # IICCON & 0x01 (busy)
-SKZ
-GOTO 38 # still busy
-GOTO 50 # send finished
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-LD 10 # TXDATA (GPIO DATA)
-ST 146 # IICTX
-LDL 8 # IIC start
-ST 144 # IICCON
-LDL 0 # clear start flag
-LD 144 # load IICCON
-AND 15
-SKZ
-GOTO 55 # still busy
-GOTO 70 # send finished
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-LDL 16 # stop flag
-ST 144 # IICCON
-NOP
-LDL 0 # clear stop flag
-ST 144
-GOTO 0 # restart
+GOTO 0 # send finished 
 HALT
