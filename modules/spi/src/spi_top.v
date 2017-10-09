@@ -37,11 +37,11 @@ module spi_top #(
     wire [7:0] spi_addr, spi_din;
     wire spi_wr_en, spi_rd_en;
     
-    assign din = (addr >= 8'h80 & addr <= 8'h83) ? spi_dout : 8'hZZ;
+    assign din = (addr >= BASE_ADDR & addr <= LAST_ADDR) ? spi_dout : 8'hZZ;
     assign spi_addr = addr;
     assign spi_din = dout;
-    assign spi_wr_en = (addr >= 8'h80 & addr <= 8'h83) ? wr_en : 1'b0;
-    assign spi_rd_en = (addr >= 8'h80 & addr <= 8'h83) ? rd_en : 1'b0;
+    assign spi_wr_en = (addr >= BASE_ADDR & addr <= LAST_ADDR) ? wr_en : 1'b0;
+    assign spi_rd_en = (addr >= BASE_ADDR & addr <= LAST_ADDR) ? rd_en : 1'b0;
     
     initial begin
         spi_dout = 8'h0;
