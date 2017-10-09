@@ -159,10 +159,6 @@ module TRSQ8(
 //        .clk(clk), // input wire clk
     
     
-//        .probe0(peri_addr), // input wire [7:0]  probe0  
-//        .probe1(peri_din), // input wire [7:0]  probe1 
-//        .probe2(peri_dout), // input wire [7:0]  probe2 
-//        .probe3(peri_wr_en), // input wire [0:0]  probe3 
-//        .probe4(peri_rd_en) // input wire [0:0]  probe4
+//        .probe0(peri_dout) // input wire [7:0]  probe1 
 //    );
 endmodule

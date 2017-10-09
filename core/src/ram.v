@@ -38,7 +38,7 @@ module ram(
     wire reset;
     wire [7:0] ram_addr, ram_din;
     wire ram_wr_en, ram_rd_en;
-    reg  [7:0] ram_dout;
+    wire  [7:0] ram_dout;
     reg  [7:0] ram_i [0:255];
     
     assign reset = ~reset_n;
@@ -60,7 +60,7 @@ module ram(
             end
         end    
     end
-    assign ram_din = ram_i[ram_addr];
+    assign ram_dout = ram_i[ram_addr];
     
     // ===== Interconnect =====
     assign din = (addr >= BASE_ADDR & addr <= LAST_ADDR) ? ram_dout : 8'hZZ;
