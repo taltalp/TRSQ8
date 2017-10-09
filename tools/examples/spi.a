@@ -4,9 +4,43 @@ LDL 170 # 0xAA
 ST 130 # spi TX (0x82)
 LDL 16 # 0x10
 ST 128 # write start (0x80)
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
 LD 128 # read spi status register
 AND 10 # status & 0x01
 SKZ
-GOTO 6 # still busy
+GOTO 40 # still busy
 GOTO 4 # tx finish
 HALT

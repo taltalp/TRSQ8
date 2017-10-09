@@ -119,7 +119,7 @@ module spi_core #(
                         // normal end of transaction, but continue
                         if (continue) begin
                             continue <= 1'b0;
-                            busy <= 1'b0;
+                            busy <= 1'b1;
                             rx_data <= rx_buffer;
                         end
                         

@@ -30,6 +30,7 @@ module TRSQ8(
     
     wire [7:0] peri_addr;
     wire [7:0] peri_din;
+    wire [7:0] peri_din_i;
     wire [7:0] peri_dout;
     wire peri_wr_en, peri_rd_en;
     
@@ -66,13 +67,15 @@ module TRSQ8(
         .prom_addr(prom_addr),
         .prom_data(prom_data),
         .addr(peri_addr),
-        .data_in(peri_din),
+        .data_in(peri_din_i),
         .data_out(peri_dout),
         .wr_en(peri_wr_en),
         .rd_en(peri_rd_en),
         //.irq_ip(irq)
         .irq_ip(0)
     );
+    
+    assign peri_din_i = peri_rd_en ? peri_din : 8'h00;
     
     prom prom_inst(
         .CLK_ip(clk),
@@ -152,14 +155,14 @@ module TRSQ8(
         .sda(iic_0_sda)
     );
     
-    ila_1 TRSQ_ila (
-        .clk(clk), // input wire clk
+//    ila_1 TRSQ_ila (
+//        .clk(clk), // input wire clk
     
     
-        .probe0(peri_addr), // input wire [7:0]  probe0  
-        .probe1(peri_din), // input wire [7:0]  probe1 
-        .probe2(peri_dout), // input wire [7:0]  probe2 
-        .probe3(peri_wr_en), // input wire [0:0]  probe3 
-        .probe4(peri_rd_en) // input wire [0:0]  probe4
-    );
+//        .probe0(peri_addr), // input wire [7:0]  probe0  
+//        .probe1(peri_din), // input wire [7:0]  probe1 
+//        .probe2(peri_dout), // input wire [7:0]  probe2 
+//        .probe3(peri_wr_en), // input wire [0:0]  probe3 
+//        .probe4(peri_rd_en) // input wire [0:0]  probe4
+//    );
 endmodule

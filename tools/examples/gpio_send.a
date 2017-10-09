@@ -17,15 +17,15 @@ ST 128 #
 LD 10 # load GPIO data
 ST 130 # set spi tx data
 LDL 16 # set spi enable
+OR 128
 ST 128 
+NOP
+NOP
 LDL 1 # busy check mask
 AND 128 # check busy
 SKZ
-GOTO 20# still busy
+GOTO 23# still busy
 GOTO 30# send finished
-NOP
-NOP
-NOP
 NOP
 NOP
 LDL 1 # mask

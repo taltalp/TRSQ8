@@ -108,4 +108,17 @@ module spi_top #(
         .rx_data(spi_rx)
     );
     
+//    ila_2 SPI_ila (
+//            .clk(clk), // input wire clk
+        
+        
+//            .probe0(SPICON), // input wire [7:0]  probe0  
+//            .probe1(SPITX), // input wire [7:0]  probe1 
+//            .probe2(SPIRX), // input wire [7:0]  probe2 
+//            .probe3(sclk), // input wire [0:0]  probe3 
+//            .probe4(miso), // input wire [0:0]  probe4
+//            .probe5(ss_n[0]), // input wire [0:0]  probe4
+//            .probe6(spi_busy) // input wire [0:0]  probe4
+//        );
+    
 endmodule
