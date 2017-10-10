@@ -43,8 +43,16 @@ module decoder (
 					 	  data_ip[14:13] == 2'b10 ? data_ip[7:0]:
 					 	                            8'h00;
 
-
-	assign sram_ld_op = data_ip[14:8] == 7'b0101101 ? 1'b1: 1'b0;
+    // peri_rd_en
+	assign sram_ld_op = data_ip[14:8] == 7'b0101101 ? 1'b1: // LD
+	                    data_ip[14:8] == 7'b0100000 ? 1'b1: // ADD 
+					 	data_ip[14:8] == 7'b0100001 ? 1'b1: // SUB
+                        data_ip[14:8] == 7'b0100111 ? 1'b1: // AND
+                        data_ip[14:8] == 7'b0101000 ? 1'b1: // OR
+                        data_ip[14:8] == 7'b0101001 ? 1'b1: // NOT
+                        data_ip[14:8] == 7'b0101011 ? 1'b1: // XOR
+	                    1'b0;
+	// peri_wr_en         
 	assign sram_st_op = data_ip[14:8] == 7'b0101100 ? 1'b1: 1'b0;
 	
 	assign nop_op    = data_ip[14:8] == 7'b0000000 ? 1'b1: 1'b0;

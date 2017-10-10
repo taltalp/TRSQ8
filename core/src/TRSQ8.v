@@ -155,10 +155,13 @@ module TRSQ8(
         .sda(iic_0_sda)
     );
     
-//    ila_1 TRSQ_ila (
-//        .clk(clk), // input wire clk
+    ila_1 TRSQ_ila (
+        .clk(clk), // input wire clk
     
-    
-//        .probe0(peri_dout) // input wire [7:0]  probe1 
-//    );
+        .probe0(peri_addr), // input wire [7:0]  probe1 
+        .probe1(peri_din), // input wire [7:0]  probe1 
+        .probe2(peri_dout), // input wire [7:0]  probe1 
+        .probe3(peri_wr_en), // input wire [7:0]  probe1 
+        .probe4(peri_rd_en) // input wire [7:0]  probe1 
+    );
 endmodule

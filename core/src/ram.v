@@ -55,7 +55,7 @@ module ram(
                 
             if (ram_wr_en == 1'b1) begin
                 if (ram_addr != 8'h00) begin
-                    ram_i[ram_addr] <= ram_dout;
+                    ram_i[ram_addr] <= ram_din;
                 end
             end
         end    
