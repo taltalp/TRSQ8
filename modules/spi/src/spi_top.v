@@ -73,9 +73,9 @@ module spi_top #(
                 endcase
             end
         end else if (clk == 1'b0) begin
-            spi_enable <= SPICON[4];
+//            spi_enable <= SPICON[4];
             // Clear enable flag automatically
-            if (spi_busy == 1'b1 & spi_enable == 1'b1) begin
+            if (spi_busy == 1'b1 & SPICON[4] == 1'b1) begin
                 SPICON <= {SPICON[7:5], 1'b0, SPICON[3:1], spi_busy};
             end else begin
                 SPICON <= {SPICON[7:1], spi_busy};
@@ -106,18 +106,5 @@ module spi_top #(
         .busy(spi_busy),
         .rx_data(spi_rx)
     );
-    
-//    ila_2 SPI_ila (
-//            .clk(clk), // input wire clk
-        
-        
-//            .probe0(SPICON), // input wire [7:0]  probe0  
-//            .probe1(SPITX), // input wire [7:0]  probe1 
-//            .probe2(SPIRX), // input wire [7:0]  probe2 
-//            .probe3(sclk), // input wire [0:0]  probe3 
-//            .probe4(miso), // input wire [0:0]  probe4
-//            .probe5(ss_n[0]), // input wire [0:0]  probe4
-//            .probe6(spi_busy) // input wire [0:0]  probe4
-//        );
     
 endmodule
