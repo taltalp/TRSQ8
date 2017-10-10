@@ -84,7 +84,7 @@ module spi_top #(
         end
     end
     
-    spi_core  
+    spi_core 
     #(
         .SLAVES(1),
         .D_WIDTH(8)
@@ -98,7 +98,6 @@ module spi_top #(
         .cpha(SPICON[2]),
         .cont(SPICON[3]),
         .clk_div(0),
-        .addr(0),
         .tx_data(SPITX),
         .miso(miso),
         .sclk(sclk),

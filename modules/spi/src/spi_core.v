@@ -12,7 +12,7 @@ module spi_core #(
     )(
     input                clock, reset_n,
     input                enable, cpol, cpha, cont,
-    input                clk_div, addr,
+    input [7:0]          clk_div,
     input [D_WIDTH-1:0]  tx_data,
     input                miso,
     output reg               sclk, mosi,
@@ -23,18 +23,17 @@ module spi_core #(
     
     `define SS_N_LEN SLAVES
     
-    localparam integer ready = 0;
-    localparam integer execute = 1;
-    integer state;
-    integer slave;
-    integer clk_ratio;
-    integer count;
-    integer clk_toggles;
+    localparam reg ready = 1'h0;
+    localparam reg execute = 1'h1;
+    reg state;
+    reg [7:0] clk_ratio;
+    reg [7:0] count;
+    reg [7:0] clk_toggles;
     reg assert_data;
     reg continue;
     reg [D_WIDTH-1:0] rx_buffer;
     reg [D_WIDTH-1:0] tx_buffer;
-    integer last_bit_rx;
+    reg [7:0] last_bit_rx;
     
     always @(posedge clock, negedge reset_n) begin
         if (!reset_n) begin
@@ -54,12 +53,6 @@ module spi_core #(
                     // user input to initiate transaction
                     if (enable) begin
                         busy <= 1'b1;
-                        
-                        if (addr < SLAVES) begin
-                            slave <= addr;
-                        end else begin
-                            slave <= 0;
-                        end
                         
                         if (clk_div == 0) begin
                             clk_ratio <= 1;
@@ -81,7 +74,7 @@ module spi_core #(
                 end
                 execute : begin : execute_state
                     busy <= 1'b1;
-                    ss_n[slave] <= 1'b0;
+                    ss_n[0] <= 1'b0;
                     
                     // system clock to sclk ratio is met
                     if (count == clk_ratio) begin
@@ -94,12 +87,12 @@ module spi_core #(
                         end 
                         
                         // spi clock toggle needed
-                        if (clk_toggles <= D_WIDTH*2 && ss_n[slave] == 1'b0) begin
+                        if (clk_toggles <= D_WIDTH*2 && ss_n[0] == 1'b0) begin
                             sclk <= ~sclk;
                         end
                         
                         // receive spi clock toggle
-                        if (assert_data == 1'b0 && clk_toggles < last_bit_rx + 1 && ss_n[slave] == 1'b0) begin
+                        if (assert_data == 1'b0 && clk_toggles < last_bit_rx + 1 && ss_n[0] == 1'b0) begin
                             rx_buffer <= {rx_buffer[D_WIDTH-2:0], miso};
                         end
                         
