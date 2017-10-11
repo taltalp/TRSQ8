@@ -41,6 +41,8 @@ module spi_core #(
             ss_n <= {`SS_N_LEN{1'b0}};
             mosi <= 1'bz;
             rx_data <= 0;
+            tx_buffer <= 0;
+            rx_buffer <= 0;
             state <= ready;
         end else begin
             case (state)

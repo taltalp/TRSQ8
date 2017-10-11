@@ -84,7 +84,7 @@ module spi_top #(
         end
     end
     
-    spi_core 
+    spi_core
     #(
         .SLAVES(1),
         .D_WIDTH(8)
