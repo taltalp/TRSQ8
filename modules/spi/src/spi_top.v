@@ -48,40 +48,38 @@ module spi_top #(
     end
     
     wire [OPT_MEM_ADDR_BITS:0] loc_addr = spi_addr[ADDR_LSB + OPT_MEM_ADDR_BITS:ADDR_LSB];
-    always @(clk) begin
-        if (clk == 1'b1) begin
-            if (spi_wr_en) begin
-                case (loc_addr)
-                    2'b00 : SPICON <= spi_din;
-                    2'b01 : SPICLKDIV <= spi_din;
-                    2'b10 : SPITX <= spi_din;
-                    2'b11 : SPIRX <= spi_din;
-                    default : begin : wr_def
-                              SPICON <= SPICON;
-                              SPICLKDIV <= SPICLKDIV;
-                              SPITX <= SPITX;
-                              SPIRX <= SPIRX;
-                              end
-                endcase
-            end else if (spi_rd_en) begin
-                case (loc_addr)
-                    2'b00 : spi_dout <= SPICON;
-                    2'b01 : spi_dout <= SPICLKDIV;
-                    2'b10 : spi_dout <= SPITX;
-                    2'b11 : spi_dout <= SPIRX;
-                    default : spi_dout <= 8'h00;
-                endcase
-            end
-        end else if (clk == 1'b0) begin
-//            spi_enable <= SPICON[4];
-            // Clear enable flag automatically
-            if (spi_busy == 1'b1 & SPICON[4] == 1'b1) begin
-                SPICON <= {SPICON[7:5], 1'b0, SPICON[3:1], spi_busy};
-            end else begin
-                SPICON <= {SPICON[7:1], spi_busy};
-            end
-            SPIRX <= spi_rx;
-        end
+    always @(posedge clk) begin
+       if (spi_wr_en) begin
+           case (loc_addr)
+               2'b00 : SPICON <= spi_din;
+               2'b01 : SPICLKDIV <= spi_din;
+               2'b10 : SPITX <= spi_din;
+               2'b11 : SPIRX <= spi_din;
+               default : begin : wr_def
+                         SPICON <= SPICON;
+                         SPICLKDIV <= SPICLKDIV;
+                         SPITX <= SPITX;
+                         SPIRX <= SPIRX;
+                         end
+           endcase
+       end else begin
+           if (spi_busy == 1'b1 & SPICON[4] == 1'b1) begin
+               SPICON <= {SPICON[7:5], 1'b0, SPICON[3:1], spi_busy};
+           end else begin
+               SPICON <= {SPICON[7:1], spi_busy};
+           end
+           SPIRX <= spi_rx;
+           
+           if (spi_rd_en) begin
+               case (loc_addr)
+                   2'b00 : spi_dout <= SPICON;
+                   2'b01 : spi_dout <= SPICLKDIV;
+                   2'b10 : spi_dout <= SPITX;
+                   2'b11 : spi_dout <= SPIRX;
+                   default : spi_dout <= 8'h00;
+               endcase
+           end
+       end
     end
     
     spi_core
