@@ -1,6 +1,6 @@
 LDL 1
 ST 10 # mask
-LDL 170 # 0xAA
+LDL 171 # 0xAB
 ST 130 # spi TX (0x82)
 LDL 16 # 0x10
 ST 128 # write start (0x80)

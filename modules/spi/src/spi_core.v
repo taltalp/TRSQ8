@@ -121,8 +121,8 @@ module spi_core #(
                         // end of transaction
                         if (clk_toggles == D_WIDTH*2-1 && cont == 1'b0) begin
                             busy <= 1'b0;
-                            ss_n <= {`SS_N_LEN{1'b1}};
-                            mosi <= 1'bz;
+                            // ss_n <= {`SS_N_LEN{1'b1}};
+                            // mosi <= 1'bz;
                             rx_data <= rx_buffer;
                             state <= ready;
                         end else begin
