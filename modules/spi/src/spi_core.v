@@ -38,6 +38,7 @@ module spi_core #(
     always @(posedge clock, negedge reset_n) begin
         if (!reset_n) begin
             busy <= 1;
+            sclk <= 1'b1;
             ss_n <= {`SS_N_LEN{1'b0}};
             mosi <= 1'b1;
             rx_data <= 0;
