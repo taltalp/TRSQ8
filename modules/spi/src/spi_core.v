@@ -39,7 +39,7 @@ module spi_core #(
         if (!reset_n) begin
             busy <= 1;
             ss_n <= {`SS_N_LEN{1'b0}};
-            mosi <= 1'bz;
+            mosi <= 1'b1;
             rx_data <= 0;
             tx_buffer <= 0;
             rx_buffer <= 0;
@@ -49,7 +49,7 @@ module spi_core #(
                 ready : begin : ready_state
                     busy <= 0;
                     ss_n <= {`SS_N_LEN{1'b1}};
-                    mosi <= 1'bz;
+                    mosi <= 1'b1;
                     continue <= 1'b1;
                     
                     // user input to initiate transaction
