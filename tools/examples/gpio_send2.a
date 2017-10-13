@@ -10,17 +10,174 @@ NOP
 NOP
 LDL 1
 ST 15 # mask
-LDL 255 # set gpio all input
-ST 137 # TRIS
-LD 138 # IGPIO Load
+LDL 255 # set gpio0 all input
+ST 137 # GPIO0 TRIS
+LDL 255 # set gpio1 all input
+ST 141 # GPIO1 TRIS
+LDL 0 # set gpio2 all output
+ST 145 # GPIO2 TRIS
+NOP
+LD 138 # GPIO0 IGPIO Load
 ST 10 # save GPIO data
 LD 10 # load GPIO data
-ST 130 # set spi tx data
-LDL 16 # set spi enable
+ST 144 # set GPIO2 OGPIO
+LD 10 # load GPIO data
+ST 130 # set spi0 tx data
+LDL 16 # set spi0 enable
 ST 128 
-LD 128 # busy check mask
+LD 128 # busy check mask (jump addr)
 AND 15 # check busy
-SKZ
-GOTO 20# still busy
-GOTO 12 # send finished 
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+LD 142 # GPIO1 IGPIO Load
+ST 11 # save GPIO data
+LD 11 # load GPIO data
+ST 144 # set GPIO2 OGPIO
+LD 11 # load GPIO data
+ST 130 # set spi0 tx data
+LDL 16 # set spi0 enable
+ST 128 # set spi0 SPICON
+LD 128 # busy check mask (jump addr)
+AND 15 # check busy
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+LDL 0
+ST 134 # set spi1 SPITX
+LDL 16 # set spi1 enable
+ST 132 # set spi1 SPICON
+LD 128 # busy check mask (jump addr)
+AND 15 # check busy
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+LD 135 # load spi1 SPIRX
+ST 12 # save received data
+LD 12 # load received data
+ST 144 # output to GPIO2
+LD 12
+ST 130
+LDL 16
+ST 128
+LD 128
+AND 15
+GOTO 0
 HALT

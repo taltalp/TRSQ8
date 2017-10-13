@@ -26,7 +26,8 @@ module spi_top #(
     localparam integer ADDR_LSB = 0;
     localparam integer OPT_MEM_ADDR_BITS = 1;
     
-    wire spi_busy, spi_rx;
+    wire spi_busy;
+    wire [7:0] spi_rx;
     reg  spi_enable, spi_busy_tmp;
     reg [7:0] SPICON    = 8'h00; 
     reg [7:0] SPICLKDIV = 8'h00; 
@@ -49,17 +50,19 @@ module spi_top #(
     
     wire [OPT_MEM_ADDR_BITS:0] loc_addr = spi_addr[ADDR_LSB + OPT_MEM_ADDR_BITS:ADDR_LSB];
     always @(posedge clk) begin
+        SPIRX <= spi_rx;
+    
        if (spi_wr_en) begin
            case (loc_addr)
                2'b00 : SPICON <= spi_din;
                2'b01 : SPICLKDIV <= spi_din;
                2'b10 : SPITX <= spi_din;
-               2'b11 : SPIRX <= spi_din;
+               // 2'b11 : SPIRX <= spi_din;
                default : begin : wr_def
                          SPICON <= SPICON;
                          SPICLKDIV <= SPICLKDIV;
                          SPITX <= SPITX;
-                         SPIRX <= SPIRX;
+                         // SPIRX <= SPIRX;
                          end
            endcase
        end else begin
@@ -68,8 +71,7 @@ module spi_top #(
            end else begin
                SPICON <= {SPICON[7:1], spi_busy};
            end
-           SPIRX <= spi_rx;
-           
+
            if (spi_rd_en) begin
                case (loc_addr)
                    2'b00 : spi_dout <= SPICON;

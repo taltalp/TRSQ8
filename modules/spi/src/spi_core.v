@@ -52,6 +52,7 @@ module spi_core #(
                     ss_n <= {`SS_N_LEN{1'b1}};
                     mosi <= 1'b1;
                     continue <= 1'b1;
+                    rx_data <= rx_buffer;
                     
                     // user input to initiate transaction
                     if (enable) begin
@@ -124,7 +125,7 @@ module spi_core #(
                             busy <= 1'b0;
                             // ss_n <= {`SS_N_LEN{1'b1}};
                             // mosi <= 1'bz;
-                            rx_data <= rx_buffer;
+                            // rx_data <= rx_buffer;
                             state <= ready;
                         end else begin
                             state <= execute;
