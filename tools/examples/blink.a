@@ -1,6 +1,6 @@
 LDL 0 # all Low
-ST 132 # OGPIO Addr
+ST 136 # OGPIO Addr
 LDL 255 # all High
-ST 132 # OGPIO Addr
+ST 136 # OGPIO Addr
 GOTO 0
 HALT

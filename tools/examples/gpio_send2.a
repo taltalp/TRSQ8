@@ -1,0 +1,26 @@
+GOTO 10
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+NOP
+LDL 1
+ST 15 # mask
+LDL 255 # set gpio all input
+ST 137 # TRIS
+LD 138 # IGPIO Load
+ST 10 # save GPIO data
+LD 10 # load GPIO data
+ST 130 # set spi tx data
+LDL 16 # set spi enable
+ST 128 
+LD 128 # busy check mask
+AND 15 # check busy
+SKZ
+GOTO 20# still busy
+GOTO 12 # send finished 
+HALT
