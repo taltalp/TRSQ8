@@ -14,11 +14,17 @@ module TRSQ8(
     output spi_0_sclk, spi_0_mosi,
     input  spi_0_miso,
     output [0:0] spi_0_cs,
+    // spi_1_inst
+    output spi_1_sclk, spi_1_mosi,
+    input  spi_1_miso,
+    output [0:0] spi_1_cs,
     // gpio_0_inst
     inout [7:0] gpio_0_port,
-    // iic_0_inst
-    output iic_0_sck,
-    inout  iic_0_sda
+    inout [7:0] gpio_1_port,
+    inout [7:0] gpio_2_port
+//    // iic_0_inst
+//    output iic_0_sck,
+//    inout  iic_0_sda
     );
     
     wire reset_n;
@@ -34,29 +40,12 @@ module TRSQ8(
     wire [7:0] peri_dout;
     wire peri_wr_en, peri_rd_en;
     
-//    reg  [7:0] ram_i [0:255];
-    
     wire [7:0] ram_addr;
     wire [7:0] ram_din;
     wire [7:0] ram_dout;
     wire ram_wr_en, ram_rd_en;
     
     // ===== User logic =====
-    // spi_0_inst
-    wire [7:0] spi_0_addr;
-    wire [7:0] spi_0_din;
-    wire [7:0] spi_0_dout;
-    wire spi_0_wr_en, spi_0_rd_en;
-    // gpio_0_inst
-    wire [7:0] gpio_0_addr;
-    wire [7:0] gpio_0_din;
-    wire [7:0] gpio_0_dout;
-    wire gpio_0_wr_en, gpio_0_rd_en;
-    // iic_0_inst
-    wire [7:0] iic_0_addr;
-    wire [7:0] iic_0_din;
-    wire [7:0] iic_0_dout;
-    wire iic_0_wr_en, iic_0_rd_en;
     
     assign reset_n = ~reset;
     
@@ -96,8 +85,8 @@ module TRSQ8(
     
     // gpio_0_inst
     gpio #(
-        .BASE_ADDR(8'h84),
-        .LAST_ADDR(8'h87)
+        .BASE_ADDR(8'h88),
+        .LAST_ADDR(8'h8b)
     )gpio_0_inst(
         .clk(clk), 
         .reset_n(reset_n),
@@ -111,6 +100,44 @@ module TRSQ8(
         
         // GPIO Interface
         .port(gpio_0_port)
+    );
+    
+    // gpio_1_inst
+    gpio #(
+        .BASE_ADDR(8'h8c),
+        .LAST_ADDR(8'h8f)
+    )gpio_1_inst(
+        .clk(clk), 
+        .reset_n(reset_n),
+        
+        // CPU Interface
+        .addr(peri_addr),
+        .din(peri_din),
+        .dout(peri_dout),
+        .wr_en(peri_wr_en),
+        .rd_en(peri_rd_en),
+        
+        // GPIO Interface
+        .port(gpio_1_port)
+    );
+    
+    // gpio_2_inst
+    gpio #(
+        .BASE_ADDR(8'h90),
+        .LAST_ADDR(8'h93)
+    )gpio_2_inst(
+        .clk(clk), 
+        .reset_n(reset_n),
+        
+        // CPU Interface
+        .addr(peri_addr),
+        .din(peri_din),
+        .dout(peri_dout),
+        .wr_en(peri_wr_en),
+        .rd_en(peri_rd_en),
+        
+        // GPIO Interface
+        .port(gpio_2_port)
     );
     
     // spi_0_inst
@@ -135,11 +162,11 @@ module TRSQ8(
         .ss_n(spi_0_cs)
     );
     
-    // iic_0_inst
-    iic_top #(
-        .BASE_ADDR(8'h90),
-        .LAST_ADDR(8'h93)
-    )iic_0_inst(
+    // spi_0_inst
+    spi_top #(
+        .BASE_ADDR(8'h84),
+        .LAST_ADDR(8'h87)
+    )spi_1_inst(
         .clk(clk),
         .reset_n(reset_n),
         
@@ -150,18 +177,40 @@ module TRSQ8(
         .wr_en(peri_wr_en),
         .rd_en(peri_rd_en),
         
-        // IIC Interface
-        .sck(iic_0_sck),
-        .sda(iic_0_sda)
+        // SPI Interface
+        .sclk(spi_1_sclk),
+        .mosi(spi_1_mosi),
+        .miso(spi_1_miso),
+        .ss_n(spi_1_cs)
     );
     
-    ila_1 TRSQ_ila (
-        .clk(clk), // input wire clk
+//    // iic_0_inst
+//    iic_top #(
+//        .BASE_ADDR(8'h90),
+//        .LAST_ADDR(8'h93)
+//    )iic_0_inst(
+//        .clk(clk),
+//        .reset_n(reset_n),
+        
+//        // CPU Interface
+//        .addr(peri_addr),
+//        .din(peri_din),
+//        .dout(peri_dout),
+//        .wr_en(peri_wr_en),
+//        .rd_en(peri_rd_en),
+        
+//        // IIC Interface
+//        .sck(iic_0_sck),
+//        .sda(iic_0_sda)
+//    );
     
-        .probe0(peri_addr), // input wire [7:0]  probe1 
-        .probe1(peri_din), // input wire [7:0]  probe1 
-        .probe2(peri_dout), // input wire [7:0]  probe1 
-        .probe3(peri_wr_en), // input wire [7:0]  probe1 
-        .probe4(peri_rd_en) // input wire [7:0]  probe1 
-    );
+//    ila_1 TRSQ_ila (
+//        .clk(clk), // input wire clk
+    
+//        .probe0(peri_addr), // input wire [7:0]  probe1 
+//        .probe1(peri_din), // input wire [7:0]  probe1 
+//        .probe2(peri_dout), // input wire [7:0]  probe1 
+//        .probe3(peri_wr_en), // input wire [7:0]  probe1 
+//        .probe4(peri_rd_en) // input wire [7:0]  probe1 
+//    );
 endmodule
