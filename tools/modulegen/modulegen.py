@@ -159,17 +159,13 @@ hdl_text_1 = [
         '    wire        peri_wr_en;\n',
         '    wire        peri_rd_en;\n',
         '\n',
-        '    // ram\n',
-        '    reg  [7:0] ram_i [0:255];\n',
         '    wire [7:0] ram_addr;\n',
         '    wire [7:0] ram_din;\n',
         '    wire [7:0] ram_dout;\n',
+        '    wire       ram_wr_en;\n',
+        '    wire       ram_rd_en;\n',
         '\n',
         '    // ===== user module =====\n',
-        ]
-
-# 各モジュールのワイヤ定義
-hdl_text_wire = [
         ]
 
 # 各種インスタンス呼び出し部
@@ -195,32 +191,18 @@ hdl_text_2 = [
         '        .DATA_op(prom_data),\n',
         '    );\n',
         '\n'
-        '    // ram\n',
-        '    always @(posedge clk) begin\n',
-        '        if (reset) begin : init_mem\n',
-        '            integer i;\n',
-        '            for (i=0; i<256; i=i+1) begin\n',
-        '                ram_i[i] <= 8\'h00;\n',
-        '            end\n',
-        '        end else begin\n',
-        '            ram_i[0] <= cpu_status;\n',
-        '            if (ram_wr_en) begin\n',
-        '                if (ram_addr != 8\'h00) begin\n',
-        '                    ram_i[ram_addr] <= ram_dout;\n',
-        '                end\n',
-        '            end\n',
-        '        end\n',
-        '    end\n',
-        '    assign ram_din = ram_i[ram_addr];\n',
-        '\n',
-        '    // ===== Interconnect =====\n',
-        '    assign ram_addr = peri_addr;\n',
-        '    assign ram_dout = peri_dout;\n',
-        '    assign ram_wr_en = (peri_addr >= 8\'h00 & peri_addr <= 8\'h7F) ? peri_wr_en : 1\'b0;\n',
-        '    assign ram_rd_en = (peri_addr >= 8\'h00 & peri_addr <= 8\'h7F) ? peri_rd_en : 1\'b0;\n',
-        '    assign peri_din = (peri_addr >= 8\'h00 & peri_addr <= 8\'h7F) ? ram_din : 8\'hZZ;\n',
-        '\n',
-        '     // ==== user module instantiation ====\n'
+        '    assign peri_din_i = peri_rd_en ? peri_din : 8\'h00;\n',
+        '\n'
+        '    ram ram_inst(\n',
+        '        .clk(clk),\n',
+        '        .reset_n(reset_n),\n',
+        '        .addr(peri_addr),\n',
+        '        .dout(peri_dout),\n',
+        '        .din(peri_din),\n',
+        '        .wr_en(peri_wr_en),\n',
+        '        .rd_en(peri_rd_en),\n',
+        '        .cpu_status(cpu_status)\n',
+        '    );\n'
         ]
 
 # ユーザ定義のモジュールインスタンス呼び出し部
@@ -235,9 +217,6 @@ for module in modules.values():
     # ポートの生成
     hdl_text = module_port(module)
     hdl_text_port += hdl_text
-    # ワイヤの生成
-    hdl_text = module_wire(module)
-    hdl_text_wire += hdl_text
 
 
 # HDLへの書き出し
