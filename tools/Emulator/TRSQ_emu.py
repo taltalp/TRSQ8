@@ -19,6 +19,7 @@ class cpu:
         self.halt = 0           # CPU halt flag 
         self.clock_count = 0    # clock counter
 
+        self.spi0  = spi(0x80)
         self.gpio0 = gpio(0x88)
 
 
@@ -53,12 +54,8 @@ class cpu:
             self.decode(self.prom[self.pc])
 
             # write any component
-            # GPIO0 emulation
-            # self.gpio(0x80)
-            # SPI0 emulation
-            # self.spi(0x84)
-
             self.gpio0.update(self.ram)
+            self.gpi0.update(self.ram)
 
             # dump ram to csv file
             for x in self.ram :
@@ -253,31 +250,35 @@ class gpio:
     '''
         GPIO EMULATOR
     '''
-
-    LATENCY = 1
-
     def __init__(self, baseaddr):
         self.baseaddr = baseaddr
         self.OGPIO = 0
         self.TRIS  = 0
         self.IGPIO = 0
 
-        self.pre_OGPIO = 0
-        self.pre_TRIS  = 0
-        self.pre_IGPIO = 0
-
     def update(self, ram):
-        # GPIOのレジスタ反映に1クロックかかる
-        self.OGPIO = self.pre_OGPIO
-        self.TRIS  = self.pre_TRIS
-        self.pre_IGPIO = self.IGPIO
+        self.OGPIO = ram[self.baseaddr + 0x00]
+        self.TRIS  = ram[self.baseaddr + 0x01]
+        self.IGPIO = ram[self.baseaddr + 0x02]
 
-        self.pre_OGPIO = ram[self.baseaddr + 0x00]
-        self.pre_TRIS  = ram[self.baseaddr + 0x01]
-        self.IGPIO     = self.pre_IGPIO
-
+        logging.debug('GPIO UPDATE')
         logging.debug(self.OGPIO)
 
+
+class spi:
+    '''
+        SPI EMULATOR
+    '''
+    def __init__(self):
+        self.baseaddr  = baseaddr
+        self.SPICON    = ram[self.baseaddr + 0x0]
+        self.SPICLKDIV = ram[self.baseaddr + 0x1]
+        self.SPITX     = ram[self.baseaddr + 0x2]
+        self.SPIRX     = ram[self.baseaddr + 0x3]
+
+    def update(self, ram):
+        logging.debug('SPI UPDATE')
+        logging.debug(self.SPICON)
 
 if __name__ == '__main__':
     cpu = cpu()
