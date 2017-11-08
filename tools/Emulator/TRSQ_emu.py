@@ -263,7 +263,17 @@ class gpio:
         self.TRIS  = ram[self.baseaddr + 0x01]
         self.IGPIO = ram[self.baseaddr + 0x02]
 
-        # TODO: PORTの記述
+        for i in range(8):
+            if ((self.TRIS >> i) & 1):
+                # TODO: IGPIOの記述
+                self.IGPIO |= 0 
+                self.PORT[i] = 'I'
+            else:
+                if ((self.OGPIO >> i) & 1):
+                    self.PORT[i] = 'O1'
+                else:
+                    self.PORT[i] = 'O0'
+
 
         logging.debug('GPIO UPDATE')
         # logging.debug(self.PORT)
@@ -278,7 +288,7 @@ class spi:
         self.baseaddr  = baseaddr
         self.RXBUF     = ''
         self.TXBUF     = ''
-        self.conuter   = 0
+        self.counter   = 0
         self.inTransaction = False
         self.PORT      = ''
 
@@ -289,17 +299,20 @@ class spi:
         self.SPIRX     = ram[self.baseaddr + 0x3]
 
         logging.debug('SPI UPDATE')
+        logging.debug(self.counter)
         # logging.debug(self.SPICON)
 
         # TODO: PORTの記述
 
         # 送信中
         if (self.inTransaction):
+            self.SPICON &= 0x11101111 # clear enable flag
             self.SPICON |= 0x1  # busy flag
 
             # 送信完了 (送信開始から19クロック)
             if (self.counter == 19):
                 self.PORT = self.TXBUF # 送信データがセットされる
+                self.counter = 0       # カウンタをリセット
                 self.inTransaction = False
 
             # 送信中
@@ -311,7 +324,7 @@ class spi:
             self.PORT = '' # 出力値は空
 
             # SPI_ENABLE フラグ建った場合
-            if (self.SPICON & 0x00100000):
+            if ((self.SPICON >> 4) & 1):
                 self.inTransaction = True
                 self.TXBUF = self.SPITX # 値をバッファに保持
 
@@ -320,4 +333,4 @@ class spi:
 if __name__ == '__main__':
     cpu = cpu()
     f = "prom.bin"
-    cpu.start(f, 10)
+    cpu.start(f, 30)
