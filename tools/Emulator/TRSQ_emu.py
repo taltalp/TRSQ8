@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import numpy as np
+import matplotlib.pyplot as plt
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -54,8 +55,8 @@ class cpu:
             self.decode(self.prom[self.pc])
 
             # write any component
-            self.gpio0.update(self.ram)
-            self.gpi0.update(self.ram)
+            logging.debug(self.gpio0.update(self.ram)) # GPIOエミュレータ
+            logging.debug(self.spi0.update(self.ram))  # SPIエミュレータ
 
             # dump ram to csv file
             for x in self.ram :
@@ -255,30 +256,66 @@ class gpio:
         self.OGPIO = 0
         self.TRIS  = 0
         self.IGPIO = 0
+        self.PORT  = ['X', 'X', 'X', 'X', 'X', 'X', 'X', 'X']
 
     def update(self, ram):
         self.OGPIO = ram[self.baseaddr + 0x00]
         self.TRIS  = ram[self.baseaddr + 0x01]
         self.IGPIO = ram[self.baseaddr + 0x02]
 
+        # TODO: PORTの記述
+
         logging.debug('GPIO UPDATE')
-        logging.debug(self.OGPIO)
+        # logging.debug(self.PORT)
+        return self.PORT
 
 
 class spi:
     '''
         SPI EMULATOR
     '''
-    def __init__(self):
+    def __init__(self, baseaddr):
         self.baseaddr  = baseaddr
+        self.RXBUF     = ''
+        self.TXBUF     = ''
+        self.conuter   = 0
+        self.inTransaction = False
+        self.PORT      = ''
+
+    def update(self, ram):
         self.SPICON    = ram[self.baseaddr + 0x0]
         self.SPICLKDIV = ram[self.baseaddr + 0x1]
         self.SPITX     = ram[self.baseaddr + 0x2]
         self.SPIRX     = ram[self.baseaddr + 0x3]
 
-    def update(self, ram):
         logging.debug('SPI UPDATE')
-        logging.debug(self.SPICON)
+        # logging.debug(self.SPICON)
+
+        # TODO: PORTの記述
+
+        # 送信中
+        if (self.inTransaction):
+            self.SPICON |= 0x1  # busy flag
+
+            # 送信完了 (送信開始から19クロック)
+            if (self.counter == 19):
+                self.PORT = self.TXBUF # 送信データがセットされる
+                self.inTransaction = False
+
+            # 送信中
+            else:
+                self.PORT = '' # 送信データは空とする
+                self.counter = self.counter + 1
+                self.inTransaction = True
+        else:
+            self.PORT = '' # 出力値は空
+
+            # SPI_ENABLE フラグ建った場合
+            if (self.SPICON & 0x00100000):
+                self.inTransaction = True
+                self.TXBUF = self.SPITX # 値をバッファに保持
+
+        return self.PORT
 
 if __name__ == '__main__':
     cpu = cpu()

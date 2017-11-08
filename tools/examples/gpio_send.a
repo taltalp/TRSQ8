@@ -11,8 +11,8 @@ NOP
 LDL 1
 ST 15
 LDL 255 # set gpio all input
-ST 133 # TRIS
-LD 134 # IGPIO Load
+ST 137 # TRIS
+LD 138 # IGPIO Load
 ST 10 # save GPIO data
 LD 10 # load GPIO data
 ST 130 # set spi tx data
