@@ -1,18 +1,26 @@
 # -*- coding: utf-8 -*-
+
 import logging
+import json
 import numpy as np
 import matplotlib.pyplot as plt
 
 logging.basicConfig(level=logging.DEBUG)
 
 class cpu:
-    """ """
+    '''
+    CPU Emulator
+    '''
 
     # define
     CF = 0
     ZF = 1
 
-    def __init__(self):
+    '''
+    init cpu internal registers
+    modules : from json
+    '''
+    def __init__(self, modules):
         self.prom = [0] * 65536 # PROM 
         self.ram  = [0] * 256   # RAM
         self.pc   = 0           # Program Counter 
@@ -20,8 +28,14 @@ class cpu:
         self.halt = 0           # CPU halt flag 
         self.clock_count = 0    # clock counter
 
-        self.spi0  = spi(0x80)
-        self.gpio0 = gpio(0x88)
+        # load module instances
+        self.modules = []
+        for a in modules:
+            baseaddr = int(modules[a]['BASEADDR'], 16)
+            if   (modules[a]['MODULE'] == 'GPIO'):
+                self.modules.append(gpio(baseaddr))
+            elif (modules[a]['MODULE'] == 'SPI' ):
+                self.modules.append(spi(baseaddr))
 
 
     def start(self, filepath, max_clock):
@@ -51,20 +65,18 @@ class cpu:
         # This is the main routine
         while(self.halt == 0):
             logging.debug('clock = ' + str(self.clock_count) + '\t' + 'pc = ' + str(self.pc) + '\t')
+
             # CPU core emulation
             self.decode(self.prom[self.pc])
 
-            # write any component
-            logging.debug(self.gpio0.update(self.ram)) # GPIOエミュレータ
-            logging.debug(self.spi0.update(self.ram))  # SPIエミュレータ
+            # Emulate each modules
+            for i in range(len(self.modules)):
+                logging.debug(self.modules[i].update(self.ram))
 
             # dump ram to csv file
             for x in self.ram :
                 f_ram.writelines(str(x) + ',')
             f_ram.writelines('\n')
-
-            # increment program counter
-            # self.pc += 1
 
             # run emulation until max clock period
             if self.clock_count >= max_clock :
@@ -331,6 +343,9 @@ class spi:
         return self.PORT
 
 if __name__ == '__main__':
-    cpu = cpu()
+    f = open('modules.json', 'r')
+    modules = json.load(f)
+
+    cpu = cpu(modules)
     f = "prom.bin"
     cpu.start(f, 30)
