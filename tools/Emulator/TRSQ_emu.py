@@ -267,10 +267,14 @@ class trsq8:
         for module in modules:
             baseaddr = int(modules[module]['BASEADDR'], 16)
             if (modules[module]['MODULE'] == 'GPIO'):
+                # append module instance
                 module_inst.append(gpio(baseaddr, module))
+                # join port status dictionary
                 port_dict.update({module:{'IGPIO':[]}})
             elif (modules[module]['MODULE'] == 'SPI'):
+                # append module instance
                 module_inst.append(spi(baseaddr, module))
+                # join port status dictionary
                 port_dict.update({module:{'SPITX':[]}})
         return module_inst, port_dict
 
@@ -286,7 +290,11 @@ class trsq8:
                     igpio = portinfo[modulename]["IGPIO"][self.clock_count]
                 else:
                     igpio = 0
-                logging.debug(self.modules[i].update(self.ram, igpio))
+                # Update module instance
+                port = self.modules[i].update(self.ram, igpio)
+                # Export port statuses
+                self.port[modulename]['IGPIO'].append(port)
+
             elif (moduleclass == 'spi'):
                 rxbuf = 0
                 logging.debug(self.modules[i].update(self.ram, rxbuf))
