@@ -39,6 +39,11 @@ class trsq8:
         f = open(filepath, 'r', encoding='utf-8-sig')
         data = f.read()
         lines = data.split('\n')
+        f.close()
+
+        # open portinfo file
+        f = open('./portinfo.json', 'r')
+        portinfo = json.load(f)
 
         # write csv header which is dumped ram data
         f_ram = open('./ram.csv', 'w')
@@ -65,9 +70,8 @@ class trsq8:
             # Emulate CPU core and Update registers
             self.decode(self.prom[self.pc])
 
-            # TODO: Import port status
             # Emulate each modules
-            self.__updateModules(0)
+            self.__updateModules(portinfo)
 
             # Dump ram to csv file
             for x in self.ram:
@@ -254,9 +258,9 @@ class trsq8:
         for module in modules:
             baseaddr = int(modules[module]['BASEADDR'], 16)
             if (modules[module]['MODULE'] == 'GPIO'):
-                module_inst.append(gpio(baseaddr))
+                module_inst.append(gpio(baseaddr, module))
             elif (modules[module]['MODULE'] == 'SPI'):
-                module_inst.append(spi(baseaddr))
+                module_inst.append(spi(baseaddr, module))
         return module_inst       
 
     def __updateModules(self, portinfo):
@@ -264,18 +268,25 @@ class trsq8:
         Update Module Instances
         '''
         for i in range(len(self.modules)):
-            modulename = self.modules[i].__class__.__name__
-            if (modulename == 'gpio'):
-                logging.debug(self.modules[i].update(self.ram, 0))
-            elif (modulename == 'spi'):
-                logging.debug(self.modules[i].update(self.ram, 0))
+            moduleclass = self.modules[i].__class__.__name__
+            modulename  = self.modules[i].modulename
+            if (moduleclass == 'gpio'):
+                if (self.clock_count < len(portinfo[modulename]["IGPIO"])):
+                    igpio = portinfo[modulename]["IGPIO"][self.clock_count]
+                else:
+                    igpio = 0
+                logging.debug(self.modules[i].update(self.ram, igpio))
+            elif (moduleclass == 'spi'):
+                rxbuf = 0
+                logging.debug(self.modules[i].update(self.ram, rxbuf))
 
 
 class gpio:
     '''
-        GPIO EMULATOR
+    GPIO EMULATOR
     '''
-    def __init__(self, baseaddr):
+    def __init__(self, baseaddr, modulename):
+        self.modulename = modulename
         self.baseaddr = baseaddr
         self.OGPIO = 0
         self.TRIS  = 0
@@ -308,7 +319,8 @@ class spi:
     '''
     SPI EMULATOR
     '''
-    def __init__(self, baseaddr):
+    def __init__(self, baseaddr, modulename):
+        self.modulename = modulename
         self.baseaddr  = baseaddr
         self.RXBUF     = ''
         self.TXBUF     = ''
