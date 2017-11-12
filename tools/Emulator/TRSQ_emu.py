@@ -288,13 +288,12 @@ class gpio:
 
 
         logging.debug('GPIO UPDATE')
-        # logging.debug(self.PORT)
         return self.PORT
 
 
 class spi:
     '''
-        SPI EMULATOR
+    SPI EMULATOR
     '''
     def __init__(self, baseaddr):
         self.baseaddr  = baseaddr
@@ -311,8 +310,6 @@ class spi:
         self.SPIRX     = ram[self.baseaddr + 0x3]
 
         logging.debug('SPI UPDATE')
-        logging.debug(self.counter)
-        # logging.debug(self.SPICON)
 
         # TODO: PORTの記述
 
@@ -341,6 +338,13 @@ class spi:
                 self.TXBUF = self.SPITX # 値をバッファに保持
 
         return self.PORT
+
+class i2c:
+    '''
+    I2C Emulator
+    '''
+    def __init__(self, baseaddr):
+        self.baseaddr = baseaddr
 
 if __name__ == '__main__':
     f = open('modules.json', 'r')
