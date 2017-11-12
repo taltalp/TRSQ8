@@ -7,39 +7,36 @@ import matplotlib.pyplot as plt
 
 logging.basicConfig(level=logging.DEBUG)
 
-class cpu:
+
+class trsq8:
     '''
     CPU Emulator
     '''
-
     # define
     CF = 0
     ZF = 1
 
-    '''
-    init cpu internal registers
-    modules : from json
-    '''
+
     def __init__(self, modules):
+        '''
+        init cpu internal registers
+        modules : dic from json
+        '''
         self.prom = [0] * 65536 # PROM 
         self.ram  = [0] * 256   # RAM
         self.pc   = 0           # Program Counter 
         self.w    = 0           # Accumulator (Working Register) 
         self.halt = 0           # CPU halt flag 
         self.clock_count = 0    # clock counter
-
-        # load module instances
-        self.modules = []
-        for a in modules:
-            baseaddr = int(modules[a]['BASEADDR'], 16)
-            if   (modules[a]['MODULE'] == 'GPIO'):
-                self.modules.append(gpio(baseaddr))
-            elif (modules[a]['MODULE'] == 'SPI' ):
-                self.modules.append(spi(baseaddr))
+        self.modules = self.__initModules(modules) # load module instances
 
 
     def start(self, filepath, max_clock):
-        logging.info('start emulation')
+        '''
+        Start TRSQ8 Emulation
+        '''
+        logging.info('START TRSQ8 EMULATION')
+
         # open prom bin file
         f = open(filepath, 'r', encoding='utf-8-sig')
         data = f.read()
@@ -64,26 +61,26 @@ class cpu:
         # Execute until halt 
         # This is the main routine
         while(self.halt == 0):
-            logging.debug('clock = ' + str(self.clock_count) + '\t' + 'pc = ' + str(self.pc) + '\t')
+            logging.debug('clock = ' + str(self.clock_count) + '\t' + 'pc = ' \
+                          + str(self.pc) + '\t')
 
-            # CPU core emulation
+            # Emulate CPU core and Update registers
             self.decode(self.prom[self.pc])
 
+            # TODO: Import port status
             # Emulate each modules
-            for i in range(len(self.modules)):
-                logging.debug(self.modules[i].update(self.ram))
+            self.__updateModules(0)
 
-            # dump ram to csv file
+            # Dump ram to csv file
             for x in self.ram :
                 f_ram.writelines(str(x) + ',')
             f_ram.writelines('\n')
 
-            # run emulation until max clock period
+            # Run emulation until max clock period
             if self.clock_count >= max_clock :
                 break
             else :
                 self.clock_count += 1
-
 
         if (self.halt == 1):
             logging.debug('HALT!')
@@ -93,10 +90,10 @@ class cpu:
         return
 
 
-    #############################
-    # TRSQ8 operation decoder
-    #############################
     def decode(self, inst):
+        '''
+        TRSQ8 Operation Decoder
+        '''
         # Immediate Data
         imf = inst & 0xff  # File Register Address
         imb = (inst >> 8) & 0x7 # Bit Address
@@ -257,7 +254,32 @@ class cpu:
     # Clear Bit 
     def __bitClear(self, bit, data):
         return (data & (0xFF - (1 << bit))) & 0xFF
-        
+
+
+    def __initModules(self, modules):
+        '''
+        Initialize Module Instances
+        '''
+        module_inst = []
+        for module in modules:
+            baseaddr = int(modules[module]['BASEADDR'], 16)
+            if   (modules[module]['MODULE'] == 'GPIO'):
+                module_inst.append(gpio(baseaddr))
+            elif (modules[module]['MODULE'] == 'SPI' ):
+                module_inst.append(spi(baseaddr))
+        return module_inst       
+
+
+    def __updateModules(self, portinfo):
+        '''
+        Update Module Instances
+        '''
+        for i in range(len(self.modules)):
+            modulename = self.modules[i].__class__.__name__
+            if (modulename == 'gpio'):
+                logging.debug(self.modules[i].update(self.ram, 0))
+            elif (modulename == 'spi'):
+                logging.debug(self.modules[i].update(self.ram, 0))
 
 class gpio:
     '''
@@ -270,22 +292,24 @@ class gpio:
         self.IGPIO = 0
         self.PORT  = ['X', 'X', 'X', 'X', 'X', 'X', 'X', 'X']
 
-    def update(self, ram):
+
+    def update(self, ram, igpio):
         self.OGPIO = ram[self.baseaddr + 0x00]
         self.TRIS  = ram[self.baseaddr + 0x01]
-        self.IGPIO = ram[self.baseaddr + 0x02]
+        self.IGPIO = igpio & 0xFF
+        ram[self.baseaddr + 0x02] = self.IGPIO
 
         for i in range(8):
-            if ((self.TRIS >> i) & 1):
-                # TODO: IGPIO‚Ì‹Lq
-                self.IGPIO |= 0 
-                self.PORT[i] = 'I'
-            else:
-                if ((self.OGPIO >> i) & 1):
-                    self.PORT[i] = 'O1'
+            if ((self.TRIS >> i) & 1):      # TRIS bits equal to 1 (Input)
+                if ((self.IGPIO >> i) & 1):
+                    self.PORT[i] = 'I1'     # Set "IN 1" to PORT bits
                 else:
-                    self.PORT[i] = 'O0'
-
+                    self.PORT[i] = 'I0'     # Set "IN 0" to PORT bits
+            else:                           # TRIS bits equal to 0 (Output)
+                if ((self.OGPIO >> i) & 1):
+                    self.PORT[i] = 'O1'     # Set "OUT 1" to PORT bits
+                else:
+                    self.PORT[i] = 'O0'     # Set "OUT 0" to PORT bits
 
         logging.debug('GPIO UPDATE')
         return self.PORT
@@ -303,7 +327,8 @@ class spi:
         self.inTransaction = False
         self.PORT      = ''
 
-    def update(self, ram):
+
+    def update(self, ram, rxbuf):
         self.SPICON    = ram[self.baseaddr + 0x0]
         self.SPICLKDIV = ram[self.baseaddr + 0x1]
         self.SPITX     = ram[self.baseaddr + 0x2]
@@ -339,6 +364,7 @@ class spi:
 
         return self.PORT
 
+
 class i2c:
     '''
     I2C Emulator
@@ -346,10 +372,11 @@ class i2c:
     def __init__(self, baseaddr):
         self.baseaddr = baseaddr
 
+
 if __name__ == '__main__':
     f = open('modules.json', 'r')
     modules = json.load(f)
 
-    cpu = cpu(modules)
+    cpu = trsq8(modules)
     f = "prom.bin"
     cpu.start(f, 30)
