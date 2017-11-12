@@ -12,5 +12,6 @@ tools/modulegen/*.v
 tools/Emulator/*.bin
 tools/Emulator/*.v
 tools/Emulator/*.csv
+tools/Emulator/portdump.json
 
 *.sh

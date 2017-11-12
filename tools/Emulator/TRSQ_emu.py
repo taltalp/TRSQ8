@@ -27,7 +27,8 @@ class trsq8:
         self.w    = 0            # Accumulator (Working Register) 
         self.halt = 0            # CPU halt flag 
         self.clock_count = 0     # clock counter
-        self.modules = self.__initModules(modules)  # load module instances
+        # load module instances and get port dict
+        self.modules, self.port = self.__initModules(modules)
 
     def start(self, filepath, max_clock):
         '''
@@ -44,8 +45,9 @@ class trsq8:
         # open portinfo file
         f = open('./portinfo.json', 'r')
         portinfo = json.load(f)
+        f.close()
 
-        # write csv header which is dumped ram data
+        # write csv header
         f_ram = open('./ram.csv', 'w')
         for i in range(len(self.ram)):
             f_ram.writelines(str(i) + ',')
@@ -89,6 +91,12 @@ class trsq8:
 
         logging.debug('----------------------------------------------------')
         logging.info(str(self.clock_count) + ' clocks emulation has finished')
+
+       # dump all port status
+        with open('./portdump.json', 'w') as f:
+            json.dump(self.port, f) 
+
+        f_ram.close()
         return
 
     def decode(self, inst):
@@ -255,13 +263,16 @@ class trsq8:
         Initialize Module Instances
         '''
         module_inst = []
+        port_dict = {}
         for module in modules:
             baseaddr = int(modules[module]['BASEADDR'], 16)
             if (modules[module]['MODULE'] == 'GPIO'):
                 module_inst.append(gpio(baseaddr, module))
+                port_dict.update({module:{'IGPIO':[]}})
             elif (modules[module]['MODULE'] == 'SPI'):
                 module_inst.append(spi(baseaddr, module))
-        return module_inst       
+                port_dict.update({module:{'SPITX':[]}})
+        return module_inst, port_dict
 
     def __updateModules(self, portinfo):
         '''
