@@ -270,12 +270,12 @@ class trsq8:
                 # append module instance
                 module_inst.append(gpio(baseaddr, module))
                 # join port status dictionary
-                port_dict.update({module:{'IGPIO':[]}})
+                port_dict.update({module:[]})
             elif (modules[module]['MODULE'] == 'SPI'):
                 # append module instance
                 module_inst.append(spi(baseaddr, module))
                 # join port status dictionary
-                port_dict.update({module:{'SPITX':[]}})
+                port_dict.update({module:[]})
         return module_inst, port_dict
 
     def __updateModules(self, portinfo):
@@ -286,18 +286,24 @@ class trsq8:
             moduleclass = self.modules[i].__class__.__name__
             modulename  = self.modules[i].modulename
             if (moduleclass == 'gpio'):
-                if (self.clock_count < len(portinfo[modulename]["IGPIO"])):
-                    igpio = portinfo[modulename]["IGPIO"][self.clock_count]
+                if (self.clock_count < len(portinfo[modulename]['IGPIO'])):
+                    igpio = portinfo[modulename]['IGPIO'][self.clock_count]
                 else:
                     igpio = 0
                 # Update module instance
                 port = self.modules[i].update(self.ram, igpio)
                 # Export port statuses
-                self.port[modulename]['IGPIO'].append(port)
+                self.port[modulename].append(port)
 
             elif (moduleclass == 'spi'):
-                rxbuf = 0
-                logging.debug(self.modules[i].update(self.ram, rxbuf))
+                if (self.clock_count < len(portinfo[modulename]['SPIRX'])):
+                    rxbuf = portinfo[modulename]['SPIRX'][self.clock_count]
+                else:
+                    rxbuf = 0
+                # Update module instance
+                port = self.modules[i].update(self.ram, rxbuf)
+                # Export port statuses
+                self.port[modulename].append(port)
 
 
 class gpio:
@@ -330,7 +336,7 @@ class gpio:
                 else:
                     self.PORT[i] = 'O0'     # Set "OUT 0" to PORT bits
 
-        logging.debug('GPIO UPDATE')
+        logging.debug(self.modulename + ' UPDATE')
         return self.PORT
 
 
@@ -353,9 +359,9 @@ class spi:
         self.SPITX     = ram[self.baseaddr + 0x2]
         self.SPIRX     = ram[self.baseaddr + 0x3]
 
-        logging.debug('SPI UPDATE')
+        logging.debug(self.modulename + ' UPDATE')
 
-        # TODO: PORT‚Ì‹Lq
+        # TODO: RX‚ÌŽÀ‘•
 
         # ‘—M’†
         if (self.inTransaction):
@@ -398,4 +404,4 @@ if __name__ == '__main__':
 
     cpu = trsq8(modules)
     f = "prom.bin"
-    cpu.start(f, 30)
+    cpu.start(f, 2)
