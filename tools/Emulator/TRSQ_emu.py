@@ -16,20 +16,18 @@ class trsq8:
     CF = 0
     ZF = 1
 
-
     def __init__(self, modules):
         '''
         init cpu internal registers
         modules : dic from json
         '''
-        self.prom = [0] * 65536 # PROM 
-        self.ram  = [0] * 256   # RAM
-        self.pc   = 0           # Program Counter 
-        self.w    = 0           # Accumulator (Working Register) 
-        self.halt = 0           # CPU halt flag 
-        self.clock_count = 0    # clock counter
-        self.modules = self.__initModules(modules) # load module instances
-
+        self.prom = [0] * 65536  # PROM 
+        self.ram  = [0] * 256    # RAM
+        self.pc   = 0            # Program Counter 
+        self.w    = 0            # Accumulator (Working Register) 
+        self.halt = 0            # CPU halt flag 
+        self.clock_count = 0     # clock counter
+        self.modules = self.__initModules(modules)  # load module instances
 
     def start(self, filepath, max_clock):
         '''
@@ -43,8 +41,8 @@ class trsq8:
         lines = data.split('\n')
 
         # write csv header which is dumped ram data
-        f_ram = open('./ram.csv', 'w');
-        for i in range(len(self.ram)) :
+        f_ram = open('./ram.csv', 'w')
+        for i in range(len(self.ram)):
             f_ram.writelines(str(i) + ',')
         f_ram.writelines('\n')
 
@@ -72,14 +70,14 @@ class trsq8:
             self.__updateModules(0)
 
             # Dump ram to csv file
-            for x in self.ram :
+            for x in self.ram:
                 f_ram.writelines(str(x) + ',')
             f_ram.writelines('\n')
 
             # Run emulation until max clock period
-            if self.clock_count >= max_clock :
+            if self.clock_count >= max_clock:
                 break
-            else :
+            else:
                 self.clock_count += 1
 
         if (self.halt == 1):
@@ -89,14 +87,13 @@ class trsq8:
         logging.info(str(self.clock_count) + ' clocks emulation has finished')
         return
 
-
     def decode(self, inst):
         '''
         TRSQ8 Operation Decoder
         '''
         # Immediate Data
-        imf = inst & 0xff  # File Register Address
-        imb = (inst >> 8) & 0x7 # Bit Address
+        imf = inst & 0xff        # File Register Address
+        imb = (inst >> 8) & 0x7  # Bit Address
 
         if ((inst >> 8) & 0x7f == 0b0100000):
             logging.debug("ADD " + str(hex(imf)))
@@ -106,7 +103,7 @@ class trsq8:
             if(self.__checkCarry(self.w)):
                 self.__setStatus(self.CF)
             self.pc += 1
-                
+
         elif ((inst >> 8) & 0x7f == 0b0100001):
             logging.debug("SUB " + str(hex(imf)))
             # W <- W + F + CF
@@ -115,7 +112,7 @@ class trsq8:
             if(self.__checkCarry(self.w)):
                 self.__setStatus(self.CF)
             self.pc += 1
-                
+
         elif ((inst >> 8) & 0x7f == 0b0100010):
             logging.debug("MULL")
             self.pc += 1
@@ -205,7 +202,6 @@ class trsq8:
 
         return
 
-
     # Set each bits of STATUS 
     def __setStatus(self, num):
         if (num < 8):
@@ -214,7 +210,6 @@ class trsq8:
             logging.error("error")
             self.halt = 1
         return
-
 
     # Get each bits of STATUS 
     def __getStatus(self, num):
@@ -228,7 +223,6 @@ class trsq8:
             self.halt = 1
             return 0
 
-
     # Check Carry 
     def __checkCarry(self, num):
         if(num > 255):
@@ -237,7 +231,6 @@ class trsq8:
         else:
             return 0
 
-
     # Check Zero 
     def __checkZero(self, num):
         if (num & 0xFF == 0):
@@ -245,16 +238,13 @@ class trsq8:
         else:
             return 0
 
-    
     # Set Bit
     def __bitSet(self, bit, data):
         return (data | (1 << bit)) & 0xFF
 
-
     # Clear Bit 
     def __bitClear(self, bit, data):
         return (data & (0xFF - (1 << bit))) & 0xFF
-
 
     def __initModules(self, modules):
         '''
@@ -263,12 +253,11 @@ class trsq8:
         module_inst = []
         for module in modules:
             baseaddr = int(modules[module]['BASEADDR'], 16)
-            if   (modules[module]['MODULE'] == 'GPIO'):
+            if (modules[module]['MODULE'] == 'GPIO'):
                 module_inst.append(gpio(baseaddr))
-            elif (modules[module]['MODULE'] == 'SPI' ):
+            elif (modules[module]['MODULE'] == 'SPI'):
                 module_inst.append(spi(baseaddr))
         return module_inst       
-
 
     def __updateModules(self, portinfo):
         '''
@@ -281,6 +270,7 @@ class trsq8:
             elif (modulename == 'spi'):
                 logging.debug(self.modules[i].update(self.ram, 0))
 
+
 class gpio:
     '''
         GPIO EMULATOR
@@ -291,7 +281,6 @@ class gpio:
         self.TRIS  = 0
         self.IGPIO = 0
         self.PORT  = ['X', 'X', 'X', 'X', 'X', 'X', 'X', 'X']
-
 
     def update(self, ram, igpio):
         self.OGPIO = ram[self.baseaddr + 0x00]
@@ -327,7 +316,6 @@ class spi:
         self.inTransaction = False
         self.PORT      = ''
 
-
     def update(self, ram, rxbuf):
         self.SPICON    = ram[self.baseaddr + 0x0]
         self.SPICLKDIV = ram[self.baseaddr + 0x1]
@@ -340,27 +328,27 @@ class spi:
 
         # 送信中
         if (self.inTransaction):
-            self.SPICON &= 0x11101111 # clear enable flag
-            self.SPICON |= 0x1  # busy flag
+            self.SPICON &= 0x11101111   # clear enable flag
+            self.SPICON |= 0x1          # busy flag
 
             # 送信完了 (送信開始から19クロック)
             if (self.counter == 19):
-                self.PORT = self.TXBUF # 送信データがセットされる
-                self.counter = 0       # カウンタをリセット
+                self.PORT = self.TXBUF  # 送信データがセットされる
+                self.counter = 0        # カウンタをリセット
                 self.inTransaction = False
 
             # 送信中
             else:
-                self.PORT = '' # 送信データは空とする
+                self.PORT = ''          # 送信データは空とする
                 self.counter = self.counter + 1
                 self.inTransaction = True
         else:
-            self.PORT = '' # 出力値は空
+            self.PORT = ''              # 出力値は空
 
             # SPI_ENABLE フラグ建った場合
             if ((self.SPICON >> 4) & 1):
                 self.inTransaction = True
-                self.TXBUF = self.SPITX # 値をバッファに保持
+                self.TXBUF = self.SPITX  # 値をバッファに保持
 
         return self.PORT
 
