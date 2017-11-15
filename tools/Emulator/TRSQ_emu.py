@@ -16,10 +16,10 @@ class trsq8:
     CF = 0
     ZF = 1
 
-    def __init__(self, modules):
+    def __init__(self, modules_path):
         '''
         init cpu internal registers
-        modules : dic from json
+        modules : dict from json
         '''
         self.prom = [0] * 65536  # PROM 
         self.ram  = [0] * 256    # RAM
@@ -27,17 +27,21 @@ class trsq8:
         self.w    = 0            # Accumulator (Working Register) 
         self.halt = 0            # CPU halt flag 
         self.clock_count = 0     # clock counter
-        # load module instances and get port dict
-        self.modules, self.port = self.__initModules(modules)
 
-    def start(self, filepath, max_clock):
+        # load module instances and get port dict
+        f = open(modules_path, 'r')
+        modules = json.load(f)
+        self.modules, self.port = self.__initModules(modules)
+        f.close()
+
+    def start(self, prom_path, max_clock):
         '''
         Start TRSQ8 Emulation
         '''
         logging.info('START TRSQ8 EMULATION')
 
         # open prom bin file
-        f = open(filepath, 'r', encoding='utf-8-sig')
+        f = open(prom_path, 'r', encoding='utf-8-sig')
         data = f.read()
         lines = data.split('\n')
         f.close()
@@ -219,7 +223,7 @@ class trsq8:
         if (num < 8):
             self.ram[0] |= (1 << num)
         else:
-            logging.error("error")
+            logging.error('error')
             self.halt = 1
         return
 
@@ -231,7 +235,7 @@ class trsq8:
             status &= 1 
             return status
         else:
-            logging.error("error")
+            logging.error('error')
             self.halt = 1
             return 0
 
@@ -261,6 +265,8 @@ class trsq8:
     def __initModules(self, modules):
         '''
         Initialize Module Instances
+
+        decode json and generate each instance
         '''
         module_inst = []
         port_dict = {}
@@ -281,6 +287,7 @@ class trsq8:
     def __updateModules(self, portinfo):
         '''
         Update Module Instances
+
         '''
         for i in range(len(self.modules)):
             moduleclass = self.modules[i].__class__.__name__
@@ -399,9 +406,5 @@ class i2c:
 
 
 if __name__ == '__main__':
-    f = open('modules.json', 'r')
-    modules = json.load(f)
-
-    cpu = trsq8(modules)
-    f = "prom.bin"
-    cpu.start(f, 2)
+    cpu = trsq8('modules.json')
+    cpu.start('prom.bin', 2)
