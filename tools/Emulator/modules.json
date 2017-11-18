@@ -3,10 +3,6 @@
         "MODULE": "SPI",
 	"BASEADDR": "80"
     },
-    "SPI1":{
-        "MODULE": "SPI",
-	"BASEADDR": "84"
-    },
     "GPIO0":{
         "MODULE": "GPIO",
 	"BASEADDR": "88"
@@ -14,9 +10,5 @@
     "GPIO1":{
         "MODULE": "GPIO",
 	"BASEADDR": "8C"
-    },
-    "GPIO2":{
-        "MODULE": "GPIO",
-	"BASEADDR": "90"
     }
 }

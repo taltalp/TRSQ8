@@ -2,10 +2,17 @@
 
 import logging
 import json
+import copy
 import numpy as np
 import matplotlib.pyplot as plt
 
 logging.basicConfig(level=logging.DEBUG)
+
+PROM_FILE       = 'prom.bin'
+MODULE_SETTINGS = 'modules.json'
+PORT_INFO_JSON  = 'portinfo.json'
+RAM_DUMP        = 'ram_dump.csv'
+PORT_DUMP       = 'port_dump.json'
 
 
 class trsq8:
@@ -47,12 +54,12 @@ class trsq8:
         f.close()
 
         # open portinfo file
-        f = open('./portinfo.json', 'r')
+        f = open(PORT_INFO_JSON, 'r')
         portinfo = json.load(f)
         f.close()
 
         # write csv header
-        f_ram = open('./ram.csv', 'w')
+        f_ram = open(RAM_DUMP, 'w')
         for i in range(len(self.ram)):
             f_ram.writelines(str(i) + ',')
         f_ram.writelines('\n')
@@ -97,7 +104,7 @@ class trsq8:
         logging.info(str(self.clock_count) + ' clocks emulation has finished')
 
        # dump all port status
-        with open('./portdump.json', 'w') as f:
+        with open(PORT_DUMP, 'w') as f:
             json.dump(self.port, f) 
 
         f_ram.close()
@@ -298,7 +305,7 @@ class trsq8:
                 else:
                     igpio = 0
                 # Update module instance
-                port = self.modules[i].update(self.ram, igpio)
+                port = copy.deepcopy(self.modules[i].update(self.ram, igpio))
                 # Export port statuses
                 self.port[modulename].append(port)
 
@@ -308,7 +315,7 @@ class trsq8:
                 else:
                     rxbuf = 0
                 # Update module instance
-                port = self.modules[i].update(self.ram, rxbuf)
+                port = copy.deepcopy(self.modules[i].update(self.ram, rxbuf))
                 # Export port statuses
                 self.port[modulename].append(port)
 
@@ -344,6 +351,7 @@ class gpio:
                     self.PORT[i] = 'O0'     # Set "OUT 0" to PORT bits
 
         logging.debug(self.modulename + ' UPDATE')
+        logging.debug(self.PORT)
         return self.PORT
 
 
@@ -394,6 +402,7 @@ class spi:
                 self.inTransaction = True
                 self.TXBUF = self.SPITX  # 値をバッファに保持
 
+        logging.debug(self.PORT)
         return self.PORT
 
 
@@ -406,5 +415,5 @@ class i2c:
 
 
 if __name__ == '__main__':
-    cpu = trsq8('modules.json')
-    cpu.start('prom.bin', 2)
+    cpu = trsq8(MODULE_SETTINGS)
+    cpu.start(PROM_FILE, 256)

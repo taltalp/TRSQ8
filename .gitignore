@@ -14,4 +14,6 @@ tools/Emulator/*.v
 tools/Emulator/*.csv
 tools/Emulator/*.json
 
+tools/Emulator/sample*
+
 *.sh
