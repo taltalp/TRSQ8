@@ -42,8 +42,6 @@ def assembler(line):
         bit = '11' + format(int(line[1]), 'b').zfill(13)
     elif (inst == 'RETURN'):
         bit = '000001000000000'
-    elif (inst == ''):
-        bit = '' 
     else:
         print('err')
     return bit
@@ -53,23 +51,105 @@ if __name__ == '__main__':
     parser.add_argument('path')
     args = parser.parse_args()
     
-    lines = []
+    # Open the file and split by return
+    lines_raw = []
     with open(args.path, 'r', encoding='utf-8-sig') as text:
-        lines = text.read()
-        lines = lines.split('\n')
+        lines_raw = text.read()
+        lines_raw = lines_raw.split('\n')
     
-    bit = []
-    for line in lines:
-        # remove comment
-        i = line.find('#') 
+    print('------- lines_raw -----------')
+    print(lines_raw)
+    print(len(lines_raw))
+
+    # Delete comments
+    lines = []
+    for line in lines_raw:
+        i = line.find('#')
         if (i > -1):
             line = line[0:i]
-        # split by whitespace
-        line = re.split(' +', line)
+        lines.append(line)
+    del(lines_raw)
+    print('------- lines -----------')
+    print(lines)
+    print(len(lines))
+
+    # TODO:
+    # Delete white-space from ':' to next character
+    # lines2 = []
+    # for line in lines:
+    #     i = line.find(':')
+    #     if (i > -1):
+    #         j = re.search(r'[a-z]+', line[i:]) 
+    #         if (j == -1):
+
+    # Remove blank line 
+    asm = []
+    for line in lines:
+        i = re.search(r'\S', line)
+        if (i != None):
+            asm.append(line)
+    del(lines)
+    print('------- asm -----------')
+    print(asm)
+    print(len(asm))
+    
+    # Assiciate label with a line number
+    labels = []
+    cnt = 0
+    for line in asm:
+        i = line.find(':')
+        if (i > -1):
+            labels.append([line[:i], cnt])
+        cnt += 1
+    print('------- labels -----------')
+    print(labels)
+
+    # Delete Labels
+    asm_nolabels = []
+    for line in asm:
+        i = line.find(':')
+        if (i > -1):
+            line = line[i+1:]
+        asm_nolabels.append(line)
+    del(asm)
+    print('------- asm_nolabels -----------')
+    print(asm_nolabels)
+    print(len(asm_nolabels))
+
+    # Replace Labels to each line number
+    asm_replaced = []
+    for line in asm_nolabels:
+        for label in labels:
+            i = re.search(label[0], line)
+            if (i != None):
+                line = line.replace(label[0], str(label[1]), 1)
+        asm_replaced.append(line)
+    del(asm_nolabels)
+    print('------- asm_replaced -----------')
+    print(asm_replaced)
+    print(len(asm_replaced))
+
+    # Split lines by white-spaces
+    asm_split = []
+    for line in asm_replaced:
+        line = line.split()
+        asm_split.append(line)
+    del(asm_replaced)
+    print('------- asm_split -----------')
+    print(asm_split)
+    print(len(asm_split))
+
+
+    print('------- Start encode -----------')
+    # 命令のエンコード
+    bit = []
+    for line in asm_split:
+        # print(line)
         assemble = assembler(line)
         if (assemble != ''):
             bit.append(assemble)
 
+    print('------- Finish encode -----------')
     # write bin file
     with open('./prom.bin', 'w', encoding='utf-8-sig') as text:
         for line in bit:
