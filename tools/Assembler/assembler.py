@@ -1,10 +1,18 @@
 # -*- coding: utf-8 -*- 
 import re
+import logging
 import argparse
 
+logging.basicConfig(level=logging.INFO)
 
+parser = argparse.ArgumentParser(\
+            description='TRSQ-8 assembler (verilog version)')
+parser.add_argument('path')
+args = parser.parse_args()
+ 
 def assembler(line):
     inst = line[0]
+    logging.debug(inst)
     bit = ''
     if (inst == 'ADD'):
         bit = '0100000' + format(int(line[1]), 'b').zfill(8)
@@ -43,23 +51,21 @@ def assembler(line):
     elif (inst == 'RETURN'):
         bit = '000001000000000'
     else:
-        print('err')
+        logging.error('err')
+
+    logging.debug(bit)
     return bit
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='TRSQ-8 assembler (verilog version)')
-    parser.add_argument('path')
-    args = parser.parse_args()
-    
     # Open the file and split by return
     lines_raw = []
     with open(args.path, 'r', encoding='utf-8-sig') as text:
         lines_raw = text.read()
         lines_raw = lines_raw.split('\n')
     
-    print('------- lines_raw -----------')
-    print(lines_raw)
-    print(len(lines_raw))
+    logging.debug('------- lines_raw -----------')
+    logging.debug(lines_raw)
+    logging.debug(len(lines_raw))
 
     # Delete comments
     lines = []
@@ -69,9 +75,9 @@ if __name__ == '__main__':
             line = line[0:i]
         lines.append(line)
     del(lines_raw)
-    print('------- lines -----------')
-    print(lines)
-    print(len(lines))
+    logging.debug('------- lines -----------')
+    logging.debug(lines)
+    logging.debug(len(lines))
 
     # TODO:
     # Delete white-space from ':' to next character
@@ -89,9 +95,9 @@ if __name__ == '__main__':
         if (i != None):
             asm.append(line)
     del(lines)
-    print('------- asm -----------')
-    print(asm)
-    print(len(asm))
+    logging.debug('------- asm -----------')
+    logging.debug(asm)
+    logging.debug(len(asm))
     
     # Assiciate label with a line number
     labels = []
@@ -101,8 +107,8 @@ if __name__ == '__main__':
         if (i > -1):
             labels.append([line[:i], cnt])
         cnt += 1
-    print('------- labels -----------')
-    print(labels)
+    logging.debug('------- labels -----------')
+    logging.debug(labels)
 
     # Delete Labels
     asm_nolabels = []
@@ -112,9 +118,9 @@ if __name__ == '__main__':
             line = line[i+1:]
         asm_nolabels.append(line)
     del(asm)
-    print('------- asm_nolabels -----------')
-    print(asm_nolabels)
-    print(len(asm_nolabels))
+    logging.debug('------- asm_nolabels -----------')
+    logging.debug(asm_nolabels)
+    logging.debug(len(asm_nolabels))
 
     # Replace Labels to each line number
     asm_replaced = []
@@ -125,9 +131,10 @@ if __name__ == '__main__':
                 line = line.replace(label[0], str(label[1]), 1)
         asm_replaced.append(line)
     del(asm_nolabels)
-    print('------- asm_replaced -----------')
-    print(asm_replaced)
-    print(len(asm_replaced))
+    del(labels)
+    logging.debug('------- asm_replaced -----------')
+    logging.debug(asm_replaced)
+    logging.debug(len(asm_replaced))
 
     # Split lines by white-spaces
     asm_split = []
@@ -135,21 +142,19 @@ if __name__ == '__main__':
         line = line.split()
         asm_split.append(line)
     del(asm_replaced)
-    print('------- asm_split -----------')
-    print(asm_split)
-    print(len(asm_split))
+    logging.debug('------- asm_split -----------')
+    logging.debug(asm_split)
+    logging.debug(len(asm_split))
 
 
-    print('------- Start encode -----------')
-    # 命令のエンコード
+    logging.debug('------- Start encode -----------')
     bit = []
     for line in asm_split:
-        # print(line)
         assemble = assembler(line)
         if (assemble != ''):
             bit.append(assemble)
 
-    print('------- Finish encode -----------')
+    logging.debug('------- Finish encode -----------')
     # write bin file
     with open('./prom.bin', 'w', encoding='utf-8-sig') as text:
         for line in bit:
