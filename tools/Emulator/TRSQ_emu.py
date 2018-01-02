@@ -118,6 +118,7 @@ class trsq8:
         imf = inst & 0xff        # File Register Address
         imb = (inst >> 8) & 0x7  # Bit Address
 
+        # ADD
         if ((inst >> 8) & 0x7f == 0b0100000):
             logging.debug("ADD " + str(hex(imf)))
             # W <- W + F + CF
@@ -127,6 +128,7 @@ class trsq8:
                 self.__setStatus(self.CF)
             self.pc += 1
 
+        # SUB
         elif ((inst >> 8) & 0x7f == 0b0100001):
             logging.debug("SUB " + str(hex(imf)))
             # W <- W + F + CF
@@ -136,83 +138,129 @@ class trsq8:
                 self.__setStatus(self.CF)
             self.pc += 1
 
+        # MULL
         elif ((inst >> 8) & 0x7f == 0b0100010):
             logging.debug("MULL")
             self.pc += 1
 
+        # MULH
         elif ((inst >> 8) & 0x7f == 0b0100011):
             logging.debug("MULH")
             self.pc += 1
 
+        # UMULL
         elif ((inst >> 8) & 0x7f == 0b0100101):
             logging.debug("UMULL")
             self.pc += 1
 
+        # UMULH
         elif ((inst >> 8) & 0x7f == 0b0100110):
             logging.debug("UMULH")
             self.pc += 1
 
+        # AND
         elif ((inst >> 8) & 0x7f == 0b0100111):
             logging.debug("AND " + str(hex(imf)))
             self.w &= self.ram[imf]
             self.pc += 1
 
+        # OR
         elif ((inst >> 8) & 0x7f == 0b0101000):
             logging.debug("OR " + str(hex(imf)))
             self.w |= self.ram[imf]
             self.pc += 1
 
+        # NOT
         elif ((inst >> 8) & 0x7f == 0b0101001):
             logging.debug("NOT " + str(hex(imf)))
             self.w = ~self.ram[imf]
             self.pc += 1
+
+        # XOR
         elif ((inst >> 8) & 0x7f == 0b0101011):
             logging.debug("XOR " + str(hex(imf)))
             self.w ^= self.ram[imf]
             self.pc += 1
+
+        # BTC
         elif ((inst >> 11) & 0xf == 0b1000):
             logging.debug("BTC")
             self.ram[imf] = self.__bitClear(imb, imf)
             self.pc += 1
+
+        # BTS
         elif ((inst >> 11) & 0xf == 0b1001):
             logging.debug("BTS")
             self.ram[imf] = self.__bitSet(imb, imf)
             self.pc += 1
+
+        # ST
         elif ((inst >> 8) & 0x7f == 0b0101100):
             logging.debug("ST " + str(hex(imf)))
             self.ram[imf] = self.w
             self.pc += 1
+
+        # LD
         elif ((inst >> 8) & 0x7f == 0b0101101):
             logging.debug("LD " + str(hex(imf)))
             self.w = self.ram[imf]
             self.pc += 1
+
+        # LDL
         elif ((inst >> 8) & 0x7f == 0b0101110):
             logging.debug("LDL " + str(hex(imf)))
             self.w = imf
             self.pc += 1
+
+        # STR
+        elif ((inst >> 8) & 0x7f == 0b0111100):
+            logging.debug("STR " + str(hex(self.ram[3])))
+            self.ram[self.ram[3]] = self.w
+            self.pc += 1
+            
+        # LDR
+        elif ((inst >> 8) & 0x7f == 0b0111101):
+            logging.debug("LDR " + str(hex(self.ram[3])))
+            self.w = self.ram[self.ram[3]]
+            self.pc += 1
+
+        # SKZ
         elif ((inst >> 8) & 0x7f == 0b0000101):
             logging.debug("SKZ")
             if (self.__getStatus(self.ZF)):
                 self.pc += 2 
             else:
                 self.pc += 1
+
+        # SKC
         elif ((inst >> 8) & 0x7f == 0b0000110):
             logging.debug("SKC")
             if (self.__getStatus(self.CF)):
                 self.pc += 2
             else:
                 self.pc += 1
+
+        # NOP
         elif ((inst >> 8) & 0x7f == 0b0000000):
             logging.debug("NOP")
             self.pc += 1
 
+        # HALT
         elif ((inst >> 8) & 0x7f == 0b0000001):
             logging.debug("HALT")
             self.halt = 1
 
+        # GOTO
         elif ((inst >> 13) & 0x3 == 0b11):
-            logging.debug("GOTO " + str(hex(inst & 0x3ff)))
-            self.pc = (inst & 0x3ff) 
+            if ((inst & 0x3ff) == 0x3ff):
+                # goto address is selected from direct addressing registers
+                goto_addr = (self.ram[1] * 256 + self.ram[2]) & 0x3ff
+                logging.debug("GOTO " + str(hex(goto_addr)))
+                self.pc = goto_addr
+            else:
+                # goto address is selected from literal
+                logging.debug("GOTO " + str(hex(inst & 0x3ff)))
+                self.pc = (inst & 0x3ff) 
         else:
             logging.debug("not implemented")
             self.halt = 1
@@ -416,4 +464,4 @@ class i2c:
 
 if __name__ == '__main__':
     cpu = trsq8(MODULE_SETTINGS)
-    cpu.start(PROM_FILE, 256)
+    cpu.start(PROM_FILE, 40)
