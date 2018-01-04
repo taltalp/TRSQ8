@@ -4,39 +4,24 @@
 This code generates TRSQ8.v Top Module file from modules.json
 '''
 
-# TODO:
-# replace modules.json
+import json
+
+MODULE_SETTINGS = '../settings/modules.json'
+
 # 使用するモジュールの定義
-modules = { 
-        'spi_0' : {
-            'name' : 'spi_0',
-            'module' : 'spi',
-            'baseaddr' : '80',
-            'lastaddr' : '83' 
-            },
-        'iic_0' : {
-            'name' : 'iic_0',
-            'module' : 'iic',
-            'baseaddr': '84',
-            'lastaddr' : '87' 
-            },
-        'gpio_0' : {
-            'name' : 'gpio_0',
-            'module' : 'gpio',
-            'baseaddr' : '88',
-            'lastaddr' : '8B'
-            }
-        }
+f = open(MODULE_SETTINGS, 'r')
+modules = json.load(f)
+f.close()
         
 # 各モジュールのインスタンスを返す
 def module_inst(module):
-    if (module['module'] == 'gpio'):
+    if (module['MODULE'] == 'GPIO'):
         hdl_text = [
-                '    // ' + module['name'] + '_inst\n',
+                '    // ' + module['NAME'] + '_inst\n',
                 '    gpio #(\n',
-                '        .BASE_ADDR(8\'h' + module['baseaddr'] + '),\n',
-                '        .LAST_ADDR(8\'h' + module['lastaddr'] + ')\n',
-                '    )' + module['name'] + '_inst',
+                '        .BASE_ADDR(8\'h' + module['BASEADDR'] + '),\n',
+                '        .LAST_ADDR(8\'h' + module['LASTADDR'] + ')\n',
+                '    )' + module['NAME'] + '_inst',
                 '        .clk(clk),\n',
                 '        .reset_n(reset_n),\n',
                 '        .addr(peri_addr),\n',
@@ -44,19 +29,19 @@ def module_inst(module):
                 '        .dout(peri_dout),\n',
                 '        .wr_en(peri_wr_en),\n',
                 '        .rd_en(peri_rd_en),\n',
-                '        .port(' + module['name'] + '_port),\n',
+                '        .port(' + module['NAME'] + '_port),\n',
                 '    );\n',
                 '\n'
                 ]
         return hdl_text
 
-    elif (module['module'] == 'spi'):
+    elif (module['MODULE'] == 'SPI'):
         hdl_text = [
-                '    // ' + module['name'] + '_inst\n',
+                '    // ' + module['NAME'] + '_inst\n',
                 '    spi #(\n',
-                '        .BASE_ADDR(8\'h' + module['baseaddr'] + '),\n',
-                '        .LAST_ADDR(8\'h' + module['lastaddr'] + ')\n',
-                '    )', module['name'] + '_inst(\n',
+                '        .BASE_ADDR(8\'h' + module['BASEADDR'] + '),\n',
+                '        .LAST_ADDR(8\'h' + module['LASTADDR'] + ')\n',
+                '    )', module['NAME'] + '_inst(\n',
                 '        .clk(clk),\n',
                 '        .reset_n(reset_n),\n',
                 '        .addr(peri_addr),\n',
@@ -64,22 +49,22 @@ def module_inst(module):
                 '        .dout(peri_dout),\n',
                 '        .wr_en(peri_wr_en),\n',
                 '        .rd_en(peri_rd_en),\n',
-                '        .sclk(' + module['name'] + '_sclk),\n',
-                '        .mosi(' + module['name'] + '_mosi),\n',
-                '        .miso(' + module['name'] + '_miso),\n',
-                '        .ss_n(' + module['name'] + '_ss_n),\n',
+                '        .sclk(' + module['NAME'] + '_sclk),\n',
+                '        .mosi(' + module['NAME'] + '_mosi),\n',
+                '        .miso(' + module['NAME'] + '_miso),\n',
+                '        .ss_n(' + module['NAME'] + '_ss_n),\n',
                 '    );\n',
                 '\n'
                 ]
         return hdl_text
 
-    elif (module['module'] == 'iic'):
+    elif (module['MODULE'] == 'IIC'):
         hdl_text = [
-                '    // ' + module['name'] + '_inst\n',
+                '    // ' + module['NAME'] + '_inst\n',
                 '    iic #(\n',
-                '        .BASE_ADDR(8\'h' + module['baseaddr'] + '),\n',
-                '        .LAST_ADDR(8\'h' + module['lastaddr'] + ')\n',
-                '    )' + module['name'] + '_inst(\n',
+                '        .BASE_ADDR(8\'h' + module['BASEADDR'] + '),\n',
+                '        .LAST_ADDR(8\'h' + module['LASTADDR'] + ')\n',
+                '    )' + module['NAME'] + '_inst(\n',
                 '        .clk(clk),\n',
                 '        .reset_n(reset_n),\n',
                 '        .addr(peri_addr),\n',
@@ -87,52 +72,56 @@ def module_inst(module):
                 '        .dout(peri_dout),\n',
                 '        .wr_en(peri_wr_en),\n',
                 '        .rd_en(peri_rd_en),\n',
-                '        .sck(' + module['name'] + '_sck),\n',
-                '        .sda(' + module['name'] + '_sda),\n',
+                '        .sck(' + module['NAME'] + '_sck),\n',
+                '        .sda(' + module['NAME'] + '_sda),\n',
                 '    );\n',
                 '\n'
                 ]
         return hdl_text
-    return
+    else:
+        print(err)
+        return
 
 # 各モジュールのポートを返す
 def module_port(module):
-    if (module['module'] == 'gpio'):
+    if (module['MODULE'] == 'GPIO'):
         hdl_text = [
                 ',\n\n',
-                '    // ' + module['name'] + '_inst\n',
-                '    inout [7:0] ' + module['name'] + '_port'
+                '    // ' + module['NAME'] + '_inst\n',
+                '    inout [7:0] ' + module['NAME'] + '_port'
                 ]
         return hdl_text
-    elif (module['module'] == 'spi'):
+    elif (module['MODULE'] == 'SPI'):
         hdl_text = [
                 ',\n\n',
-                '    // ' + module['name'] + '_inst\n',
-                '    output ' + module['name'] + '_sclk,\n',
-                '    output ' + module['name'] + '_mosi,\n',
-                '    input ' + module['name'] + '_miso,\n',
-                '    output [0:0] ' + module['name'] + '_cs'
+                '    // ' + module['NAME'] + '_inst\n',
+                '    output ' + module['NAME'] + '_sclk,\n',
+                '    output ' + module['NAME'] + '_mosi,\n',
+                '    input ' + module['NAME'] + '_miso,\n',
+                '    output [0:0] ' + module['NAME'] + '_cs'
                 ]
         return hdl_text
-    elif (module['module'] == 'iic'):
+    elif (module['MODULE'] == 'IIC'):
         hdl_text = [
                 ',\n\n',
-                '    // ' + module['name'] + '_inst\n',
-                '    output ' + module['name'] + '_sck,\n',
-                '    inout ' + module['name'] + '_sda',
+                '    // ' + module['NAME'] + '_inst\n',
+                '    output ' + module['NAME'] + '_sck,\n',
+                '    inout ' + module['NAME'] + '_sda',
                 ]
         return hdl_text
-    return
+    else:
+        print(err)
+        return
 
 # 各モジュールのワイヤを返す
 def module_wire(module):
     hdl_text = [
-            '    // ' + module['name'] + '_inst\n',
-            '    wire [7:0] ' + module['name'] + '_addr;\n',
-            '    wire [7:0] ' + module['name'] + '_din;\n',
-            '    wire [7:0] ' + module['name'] + '_dout;\n',
-            '    wire ' + module['name'] + '_wr_en;\n',
-            '    wire ' + module['name'] + '_rd_en;\n'
+            '    // ' + module['NAME'] + '_inst\n',
+            '    wire [7:0] ' + module['NAME'] + '_addr;\n',
+            '    wire [7:0] ' + module['NAME'] + '_din;\n',
+            '    wire [7:0] ' + module['NAME'] + '_dout;\n',
+            '    wire ' + module['NAME'] + '_wr_en;\n',
+            '    wire ' + module['NAME'] + '_rd_en;\n'
             ]
     return hdl_text
 
@@ -216,7 +205,7 @@ hdl_text_module = [
         ]
 
 for module in modules.values():
-    print(module)
+    # print(module)
     # インスタンスの生成
     hdl_text = module_inst(module)
     hdl_text_module += hdl_text
