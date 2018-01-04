@@ -15,9 +15,9 @@ parser.add_argument('-c', '--count', nargs='?', default=100, \
                     help='The number of simulation clocks. default=100')
 args = parser.parse_args()
 
-PROM_FILE       = 'prom.bin'
-MODULE_SETTINGS = 'modules.json'
-PORT_INFO_JSON  = 'portinfo.json'
+PROM_FILE       = '../settings/prom.bin'
+MODULE_SETTINGS = '../settings/modules.json'
+PORT_INFO_JSON  = '../settings/portinfo.json'
 RAM_DUMP        = 'ram_dump.csv'
 PORT_DUMP       = 'port_dump.json'
 

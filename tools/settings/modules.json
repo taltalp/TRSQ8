@@ -1,11 +1,11 @@
 {
     "SPI0":{
         "MODULE": "SPI",
-	"BASEADDR": "80"
+	"BASEADDR": "88"
     },
     "GPIO0":{
         "MODULE": "GPIO",
-	"BASEADDR": "88"
+	"BASEADDR": "80"
     },
     "GPIO1":{
         "MODULE": "GPIO",

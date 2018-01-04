@@ -83,15 +83,6 @@ if __name__ == '__main__':
     logging.debug(lines)
     logging.debug(len(lines))
 
-    # TODO:
-    # Delete white-space from ':' to next character
-    # lines2 = []
-    # for line in lines:
-    #     i = line.find(':')
-    #     if (i > -1):
-    #         j = re.search(r'[a-z]+', line[i:]) 
-    #         if (j == -1):
-
     # Remove blank line 
     asm = []
     for line in lines:
@@ -102,7 +93,25 @@ if __name__ == '__main__':
     logging.debug('------- asm -----------')
     logging.debug(asm)
     logging.debug(len(asm))
-    
+
+    # TODO:
+    # Delete white-space from ':' to next character
+    # asm_shaped = []
+    # tmp = ""
+    # flag = False
+    # for line in asm:
+    #     if (flag = True):
+    #         line = tmp + line
+    #         flag = False
+
+    #     # search characters from ':' to EOL
+    #     i = line.find(':')
+    #     j = re.search(r'\S', line[i+1:])
+    #     if (j == None):
+    #         tmp = line[:i]
+    #         flag = True
+
+
     # Assiciate label with a line number
     labels = []
     cnt = 0
