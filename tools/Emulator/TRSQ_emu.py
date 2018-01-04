@@ -72,11 +72,11 @@ class trsq8:
                 i += 1
 
         logging.debug('CLK\tPC\tOperation\tSTATUS')
-        logging.debug('----------------------------------------------------')
 
         # Execute until halt 
         # This is the main routine
         while(self.halt == 0):
+            logging.debug('----------------------------------------------------')
             logging.debug('clock = ' + str(self.clock_count) + '\t' + 'pc = ' \
                           + str(self.pc) + '\t')
 
@@ -269,7 +269,18 @@ class trsq8:
         if(self.__checkZero(self.w)):
             self.__setStatus(self.ZF)
 
-        logging.debug(bin(self.ram[0]))
+        logging.debug("RAM[0] = " + str(bin(self.ram[0])))
+        logging.debug("RAM[1] = " + str(hex(self.ram[1])))
+        logging.debug("RAM[2] = " + str(hex(self.ram[2])))
+        logging.debug("RAM[3] = " + str(hex(self.ram[3])))
+        logging.debug("A(0x10) = " + str(hex(self.ram[16])))
+        logging.debug("B(0x11) = " + str(hex(self.ram[17])))
+        logging.debug("C(0x12) = " + str(hex(self.ram[18])))
+        logging.debug("D(0x13) = " + str(hex(self.ram[19])))
+        logging.debug("BP(0x14) = " + str(hex(self.ram[20])))
+        logging.debug("SP(0x15) = " + str(hex(self.ram[21])))
+        logging.debug("R0(0x16) = " + str(hex(self.ram[22])))
+        logging.debug("W = " + str(hex(self.w)))
 
         return
 
@@ -464,4 +475,4 @@ class i2c:
 
 if __name__ == '__main__':
     cpu = trsq8(MODULE_SETTINGS)
-    cpu.start(PROM_FILE, 40)
+    cpu.start(PROM_FILE, 100)
