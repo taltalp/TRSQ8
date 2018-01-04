@@ -1,14 +1,20 @@
 {
     "SPI0":{
+	"NAME" : "spi_0",
         "MODULE": "SPI",
-	"BASEADDR": "88"
+	"BASEADDR": "88",
+	"LASTADDR": "8B"
     },
     "GPIO0":{
+	"NAME" : "gpio_0",
         "MODULE": "GPIO",
-	"BASEADDR": "80"
+	"BASEADDR": "80",
+	"LASTADDR": "84"
     },
     "GPIO1":{
+	"NAME" : "gpio_1",
         "MODULE": "GPIO",
-	"BASEADDR": "8C"
+	"BASEADDR": "8C",
+	"LASTADDR": "8F"
     }
 }

@@ -16,4 +16,6 @@ tools/Emulator/*.json
 
 tools/Emulator/sample*
 
+tools/settings/*
+
 *.sh
