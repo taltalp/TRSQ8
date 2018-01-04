@@ -3,10 +3,17 @@
 import logging
 import json
 import copy
-# import numpy as np
-# import matplotlib.pyplot as plt
+import argparse
 
+# Logging
 logging.basicConfig(level=logging.DEBUG)
+
+# argpase
+parser = argparse.ArgumentParser(\
+        description='This script is TRSQ-8 Emulator. module.json, portinfo.json and prom.v are needed to place into the same directory')
+parser.add_argument('-c', '--count', nargs='?', default=100, \
+                    help='The number of simulation clocks. default=100')
+args = parser.parse_args()
 
 PROM_FILE       = 'prom.bin'
 MODULE_SETTINGS = 'modules.json'
@@ -475,4 +482,4 @@ class i2c:
 
 if __name__ == '__main__':
     cpu = trsq8(MODULE_SETTINGS)
-    cpu.start(PROM_FILE, 100)
+    cpu.start(PROM_FILE, int(args.count))
