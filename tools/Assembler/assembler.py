@@ -38,6 +38,10 @@ def assembler(line):
         bit = '0101101' + format(int(line[1]), 'b').zfill(8)
     elif (inst == 'LDL'):
         bit = '0101110' + format(int(line[1]), 'b').zfill(8)
+    elif (inst == 'STR'):
+        bit = '011110000000000'
+    elif (inst == 'LDR'):
+        bit = '011110100000000'
     elif (inst == 'SKZ'):
         bit = '000010100000000' 
     elif (inst == 'SKC'):
@@ -51,7 +55,7 @@ def assembler(line):
     elif (inst == 'RETURN'):
         bit = '000001000000000'
     else:
-        logging.error('err')
+        logging.error('err: ' + inst)
 
     logging.debug(bit)
     return bit
