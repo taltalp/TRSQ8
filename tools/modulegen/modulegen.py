@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*- 
 
-# g—p‚·‚éƒ‚ƒWƒ…[ƒ‹‚Ì’è‹`
+'''
+This code generates TRSQ8.v Top Module file from modules.json
+'''
+
+# TODO:
+# replace modules.json
+# ä½¿ç”¨ã™ã‚‹ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã®å®šç¾©
 modules = { 
         'spi_0' : {
             'name' : 'spi_0',
@@ -22,7 +28,7 @@ modules = {
             }
         }
         
-# Šeƒ‚ƒWƒ…[ƒ‹‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚ğ•Ô‚·
+# å„ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’è¿”ã™
 def module_inst(module):
     if (module['module'] == 'gpio'):
         hdl_text = [
@@ -89,7 +95,7 @@ def module_inst(module):
         return hdl_text
     return
 
-# Šeƒ‚ƒWƒ…[ƒ‹‚Ìƒ|[ƒg‚ğ•Ô‚·
+# å„ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã®ãƒãƒ¼ãƒˆã‚’è¿”ã™
 def module_port(module):
     if (module['module'] == 'gpio'):
         hdl_text = [
@@ -118,7 +124,7 @@ def module_port(module):
         return hdl_text
     return
 
-# Šeƒ‚ƒWƒ…[ƒ‹‚ÌƒƒCƒ„‚ğ•Ô‚·
+# å„ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã®ãƒ¯ã‚¤ãƒ¤ã‚’è¿”ã™
 def module_wire(module):
     hdl_text = [
             '    // ' + module['name'] + '_inst\n',
@@ -131,7 +137,7 @@ def module_wire(module):
     return hdl_text
 
 
-# ƒ‚ƒWƒ…[ƒ‹‚Ì’è‹`‚Æƒ|[ƒg‚Ì’è‹`
+# ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã®å®šç¾©ã¨ãƒãƒ¼ãƒˆã®å®šç¾©
 hdl_text_0 = [
         '`timescale 1ns / 1ps\n',
         'module TRSQ8(\n',
@@ -139,11 +145,11 @@ hdl_text_0 = [
         '    input reset',
         ]
 
-# Šeƒ‚ƒWƒ…[ƒ‹‚Ìƒ|[ƒg‚Ì’è‹`
+# å„ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã®ãƒãƒ¼ãƒˆã®å®šç¾©
 hdl_text_port = [
         ]
 
-# “à•”‚ÌƒƒCƒ„’è‹`•”•ª
+# å†…éƒ¨ã®ãƒ¯ã‚¤ãƒ¤å®šç¾©éƒ¨åˆ†
 hdl_text_1 = [
         ');\n',
         '\n',
@@ -168,7 +174,7 @@ hdl_text_1 = [
         '    // ===== user module =====\n',
         ]
 
-# ŠeíƒCƒ“ƒXƒ^ƒ“ƒXŒÄ‚Ño‚µ•”
+# å„ç¨®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹å‘¼ã³å‡ºã—éƒ¨
 hdl_text_2 = [
         '\n',
         '    assign reset_n = ~reset;\n',
@@ -205,26 +211,26 @@ hdl_text_2 = [
         '    );\n'
         ]
 
-# ƒ†[ƒU’è‹`‚Ìƒ‚ƒWƒ…[ƒ‹ƒCƒ“ƒXƒ^ƒ“ƒXŒÄ‚Ño‚µ•”
+# ãƒ¦ãƒ¼ã‚¶å®šç¾©ã®ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹å‘¼ã³å‡ºã—éƒ¨
 hdl_text_module = [
         ]
 
 for module in modules.values():
     print(module)
-    # ƒCƒ“ƒXƒ^ƒ“ƒX‚Ì¶¬
+    # ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã®ç”Ÿæˆ
     hdl_text = module_inst(module)
     hdl_text_module += hdl_text
-    # ƒ|[ƒg‚Ì¶¬
+    # ãƒãƒ¼ãƒˆã®ç”Ÿæˆ
     hdl_text = module_port(module)
     hdl_text_port += hdl_text
 
 
-# HDL‚Ö‚Ì‘‚«o‚µ
+# HDLã¸ã®æ›¸ãå‡ºã—
 with open('./TRSQ8.v', 'w', encoding='utf-8-sig') as text:
     text.writelines(hdl_text_0)
     text.writelines(hdl_text_port)
     text.writelines(hdl_text_1)
-    text.writelines(hdl_text_wire)
+    # text.writelines(hdl_text_wire)
     text.writelines(hdl_text_2)
     text.writelines(hdl_text_module)
     text.writelines('endmodule')
