@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*- 
 import re
 import logging
@@ -9,7 +10,7 @@ parser = argparse.ArgumentParser(\
             description='TRSQ-8 assembler (verilog version)')
 parser.add_argument('path')
 args = parser.parse_args()
- 
+
 def assembler(line):
     inst = line[0]
     logging.debug(inst)
