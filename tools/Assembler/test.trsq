@@ -1,0 +1,11 @@
+  LDL 1
+  ST 10
+pc_0:
+hoge:
+  LDL 1
+  ADD 10
+  ST 10
+  LD 10
+  ST 11
+  GOTO hoge
+  HALT

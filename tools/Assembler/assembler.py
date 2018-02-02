@@ -11,6 +11,9 @@ parser = argparse.ArgumentParser(\
 parser.add_argument('path')
 args = parser.parse_args()
 
+def get_inst(line):
+  return line.split()[0]
+
 def assembler(line):
     inst = line[0]
     logging.debug(inst)
@@ -112,15 +115,21 @@ if __name__ == '__main__':
     #         tmp = line[:i]
     #         flag = True
 
-
-    # Assiciate label with a line number
-    labels = []
-    cnt = 0
+    labels = {}
+    lines2 = []
+    # Create labels dict.
+    label_cache = []
     for line in asm:
-        i = line.find(':')
-        if (i > -1):
-            labels.append([line[:i], cnt])
-        cnt += 1
+      label_m = re.search(r'(\w+):', line)
+      if label_m:
+        l_name = label_m.group(1)
+        label_cache.append(l_name)
+        continue
+      for l_name in label_cache:
+        labels[l_name] = len(lines2)
+      label_cache = []
+      lines2.append(line)
+
     logging.debug('------- labels -----------')
     logging.debug(labels)
 
@@ -136,26 +145,22 @@ if __name__ == '__main__':
     logging.debug(asm_nolabels)
     logging.debug(len(asm_nolabels))
 
+    asm_list = []
+
     # Replace Labels to each line number
-    asm_replaced = []
-    for line in asm_nolabels:
-        for label in labels:
-            i = re.search(label[0], line)
-            if (i != None):
-                line = line.replace(label[0], str(label[1]), 1)
-        asm_replaced.append(line)
-    del(asm_nolabels)
-    del(labels)
-    logging.debug('------- asm_replaced -----------')
-    logging.debug(asm_replaced)
-    logging.debug(len(asm_replaced))
+    for line in lines2:
+      if get_inst(line) == 'GOTO':
+        l_name = line.split()[1]
+        ln = labels[l_name]
+        asm_list.append(line.replace(l_name, str(ln)))
+      else:
+        asm_list.append(line)
 
     # Split lines by white-spaces
     asm_split = []
-    for line in asm_replaced:
+    for line in asm_list:
         line = line.split()
         asm_split.append(line)
-    del(asm_replaced)
     logging.debug('------- asm_split -----------')
     logging.debug(asm_split)
     logging.debug(len(asm_split))
