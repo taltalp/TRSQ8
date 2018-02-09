@@ -11,8 +11,8 @@ logging.basicConfig(level=logging.DEBUG)
 # argpase
 parser = argparse.ArgumentParser(\
         description='This script is TRSQ-8 Emulator. module.json, portinfo.json and prom.v are needed to place into the same directory')
-parser.add_argument('-c', '--count', nargs='?', default=100, \
-                    help='The number of simulation clocks. default=100')
+parser.add_argument('-c', '--count', nargs='?', default=1000, \
+                    help='The number of simulation clocks. default=1000')
 args = parser.parse_args()
 
 PROM_FILE       = '../settings/prom.bin'
@@ -442,31 +442,31 @@ class spi:
 
         logging.debug(self.modulename + ' UPDATE')
 
-        # TODO: RX‚ÌÀ‘•
+        # TODO: RXã®å®Ÿè£…
 
-        # ‘—M’†
+        # é€ä¿¡ä¸­
         if (self.inTransaction):
             self.SPICON &= 0x11101111   # clear enable flag
             self.SPICON |= 0x1          # busy flag
 
-            # ‘—MŠ®—¹ (‘—MŠJn‚©‚ç19ƒNƒƒbƒN)
+            # é€ä¿¡å®Œäº† (é€ä¿¡é–‹å§‹ã‹ã‚‰19ã‚¯ãƒ­ãƒƒã‚¯)
             if (self.counter == 19):
-                self.PORT = self.TXBUF  # ‘—Mƒf[ƒ^‚ªƒZƒbƒg‚³‚ê‚é
-                self.counter = 0        # ƒJƒEƒ“ƒ^‚ğƒŠƒZƒbƒg
+                self.PORT = self.TXBUF  # é€ä¿¡ãƒ‡ãƒ¼ã‚¿ãŒã‚»ãƒƒãƒˆã•ã‚Œã‚‹
+                self.counter = 0        # ã‚«ã‚¦ãƒ³ã‚¿ã‚’ãƒªã‚»ãƒƒãƒˆ
                 self.inTransaction = False
 
-            # ‘—M’†
+            # é€ä¿¡ä¸­
             else:
-                self.PORT = ''          # ‘—Mƒf[ƒ^‚Í‹ó‚Æ‚·‚é
+                self.PORT = ''          # é€ä¿¡ãƒ‡ãƒ¼ã‚¿ã¯ç©ºã¨ã™ã‚‹
                 self.counter = self.counter + 1
                 self.inTransaction = True
         else:
-            self.PORT = ''              # o—Í’l‚Í‹ó
+            self.PORT = ''              # å‡ºåŠ›å€¤ã¯ç©º
 
-            # SPI_ENABLE ƒtƒ‰ƒOŒš‚Á‚½ê‡
+            # SPI_ENABLE ãƒ•ãƒ©ã‚°å»ºã£ãŸå ´åˆ
             if ((self.SPICON >> 4) & 1):
                 self.inTransaction = True
-                self.TXBUF = self.SPITX  # ’l‚ğƒoƒbƒtƒ@‚É•Û
+                self.TXBUF = self.SPITX  # å€¤ã‚’ãƒãƒƒãƒ•ã‚¡ã«ä¿æŒ
 
         logging.debug(self.PORT)
         return self.PORT
